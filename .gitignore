@@ -1,0 +1,12 @@
+undercut_papers/design_system.html
+undercut_papers/design_system.html.bak
+design/*
+undercut_papers/.dart_tool
+undercut_papers/.github
+undercut_papers/.vscode
+undercut_papers/undercut_papers_client
+undercut_papers/undercut_papers_flutter
+undercut_papers/undercut_papers_server
+undercut_papers/pubspec.lock
+undercut_papers/pubspec.yaml
+undercut_papers/tokens.json

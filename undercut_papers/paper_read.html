@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#111110">
+<title>Cosine Similarity as Logits? — Neosis Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #111110;
+  --surface: #181816;
+  --fg: #F0EBE0;
+  --fg-secondary: #A8A090;
+  --fg-tertiary: #8A8474;
+  --accent: #DFFF1A;
+  --accent-hover: #EAFF4D;
+  --border: rgba(240,235,224,0.10);
+  --border-solid: #3A3A38;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+  height: 100%;
+}
+
+::selection { background: var(--accent); color: #111110; }
+
+a:focus-visible, button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.main-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+.main-scroll::-webkit-scrollbar { display: none; }
+
+/* ── Service header ── */
+.service-header {
+  border-bottom: 1px solid var(--border-solid);
+  background: var(--bg);
+}
+.service-header-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--fg-secondary);
+  text-decoration: none;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+.back-link:hover { color: var(--fg); }
+.service-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--fg);
+}
+
+/* ── Page ── */
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 20px 96px;
+}
+
+/* ── Title ── */
+.page-title {
+  font-size: clamp(26px, 4.5vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--fg);
+  margin-bottom: 16px;
+  text-wrap: balance;
+  max-width: 640px;
+}
+
+.page-title .accent {
+  color: var(--accent);
+}
+
+/* ── Meta strip ── */
+.meta-strip {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--fg-tertiary);
+  margin-bottom: 40px;
+}
+.meta-strip a {
+  color: var(--fg-secondary);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.meta-strip a:hover { color: var(--fg); }
+.meta-strip .sep { color: var(--border); margin: 0 6px; }
+
+/* ── Body ── */
+.prose {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--fg);
+}
+.prose p {
+  margin-bottom: 20px;
+  max-width: 660px;
+}
+.prose ul {
+  margin-bottom: 20px;
+  padding-left: 20px;
+  max-width: 660px;
+}
+.prose li {
+  margin-bottom: 8px;
+}
+
+/* ── Section headings ── */
+.section-heading {
+  font-family: var(--font-sans);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.22;
+  color: var(--fg);
+  letter-spacing: -0.015em;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  padding-top: 24px;
+  position: relative;
+}
+.section-heading::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 3px;
+  background: var(--accent);
+  margin-bottom: 16px;
+}
+
+/* ── Section divider ── */
+.section-divider {
+  border: 0;
+  height: 1px;
+  background: var(--border-solid);
+  margin: 40px 0;
+}
+
+/* ── Action box ── */
+.action-box {
+  margin-top: 48px;
+  padding: 24px;
+  border: 1px solid var(--border-solid);
+  background: var(--surface);
+}
+.action-box p {
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--fg-secondary);
+  margin-bottom: 20px;
+}
+.gem-c-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 14px 20px;
+  background: var(--accent);
+  color: #111110;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+.gem-c-button:hover { background: var(--accent-hover); }
+
+/* ── Bottom nav ── */
+.bottom-nav {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: var(--bg);
+  border-top: 1px solid var(--border-solid);
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+}
+.bottom-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 16px;
+  color: var(--fg-tertiary);
+  text-decoration: none;
+  transition: color 0.15s linear;
+}
+.bottom-nav a.active { color: var(--accent); }
+.bottom-nav a:active { color: var(--fg); }
+.nav-icon svg { display: block; }
+.nav-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* ── Floating chat FAB ── */
+.chat-fab {
+  position: fixed;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  right: 20px;
+  z-index: 100;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--border-solid);
+  background: var(--surface);
+  color: var(--fg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: none;
+  transition: transform .15s ease, background .15s ease, color .15s ease;
+}
+.chat-fab:hover { background: var(--bg); color: var(--fg); transform: scale(1.05); }
+.chat-fab:active { transform: scale(0.95); }
+
+/* ── Chat overlay ── */
+.chat-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.4);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+.chat-overlay[hidden] { display: none; }
+.chat-overlay.is-visible { opacity: 1; }
+
+/* ── Chat drawer ── */
+.chat-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  max-height: 75vh;
+  background: var(--surface);
+  border-top: 1px solid var(--border-solid);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  transform: translateY(100%);
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
+}
+.chat-drawer.is-open {
+  transform: translateY(0);
+}
+.chat-drawer[hidden] { display: none; }
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-solid);
+}
+.chat-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fg);
+}
+.chat-close {
+  background: none;
+  border: none;
+  color: var(--fg-secondary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+}
+.chat-close:hover { color: var(--fg); }
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.chat-messages::-webkit-scrollbar { display: none; }
+
+.chat-msg {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  line-height: 1.45;
+  word-wrap: break-word;
+}
+.chat-msg-bot {
+  align-self: flex-start;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border-solid);
+}
+.chat-msg-user {
+  align-self: flex-end;
+  background: var(--accent);
+  color: #111110;
+}
+
+.chat-footer {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border-solid);
+  background: var(--bg);
+}
+.chat-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.4;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border-solid);
+  border-radius: 20px;
+  color: var(--fg);
+  outline: none;
+}
+.chat-input::placeholder { color: var(--fg-tertiary); }
+.chat-input:focus { border-color: var(--accent); }
+.chat-send {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #111110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.chat-send:disabled { opacity: .5; cursor: not-allowed; }
+.chat-send:hover:not(:disabled) { background: var(--accent-hover); }
+
+/* ── Loading dot animation ── */
+.chat-loading {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border-solid);
+  border-radius: 12px;
+  align-self: flex-start;
+}
+.chat-loading span {
+  width: 6px;
+  height: 6px;
+  background: var(--fg-secondary);
+  border-radius: 50%;
+  animation: chat-bounce 1.4s ease-in-out infinite;
+}
+.chat-loading span:nth-child(2) { animation-delay: .16s; }
+.chat-loading span:nth-child(3) { animation-delay: .32s; }
+@keyframes chat-bounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+  .chat-loading span { animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="service-header">
+    <div class="service-header-inner">
+      <a href="#" class="back-link" onclick="history.back(); return false;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Back
+      </a>
+      <span class="service-name">Neosis Archive</span>
+    </div>
+  </header>
+
+  <main class="main-scroll">
+    <article class="page">
+
+      <h1 class="page-title">Cosine Similarity as Logits? A Scalable Knowledge Probe Using <span class="accent">Embedding Vectors</span> from Generative Language Models</h1>
+
+      <div class="meta-strip">
+        Jinno, Hayashi, Sakai, Kamigaito, Watanabe
+        <span class="sep">·</span>
+        EACL 2026
+        <span class="sep">·</span>
+        <a href="https://aclanthology.org/2026.eacl-long.382/">2026.eacl-long.382</a>
+        <span class="sep">·</span>
+        pp. 8188–8200
+      </div>
+
+      <figure class="paper-figure">
+        <svg viewBox="0 0 680 280" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="figTitle" role="img">
+          <title id="figTitle">Sparse attention routing. The routing gate selects a subset of keys for each query, reducing computation from quadratic to linear.</title>
+          <!-- background -->
+          <rect width="680" height="280" fill="#181816" rx="0"\/>
+
+          <!-- Dense attention label -->
+          <text x="90" y="32" fill="#8A8474" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="500">Dense attention (quadratic)</text>
+          <!-- Dense grid -->
+          <g id="dense" stroke="#33332E" stroke-width="1">
+            <rect x="30" y="48" width="120" height="120"\/>
+            <line x1="30" y1="68" x2="150" y2="68"\/>
+            <line x1="30" y1="88" x2="150" y2="88"\/>
+            <line x1="30" y1="108" x2="150" y2="108"\/>
+            <line x1="30" y1="128" x2="150" y2="128"\/>
+            <line x1="30" y1="148" x2="150" y2="148"\/>
+            <line x1="50" y1="48" x2="50" y2="168"\/>
+            <line x1="70" y1="48" x2="70" y2="168"\/>
+            <line x1="90" y1="48" x2="90" y2="168"\/>
+            <line x1="110" y1="48" x2="110" y2="168"\/>
+            <line x1="130" y1="48" x2="130" y2="168"\/>
+          </g>
+          <!-- dense highlight cells -->
+          <rect x="30" y="48" width="20" height="20" fill="#DFFF1A" opacity="0.25"\/>
+          <rect x="70" y="88" width="20" height="20" fill="#DFFF1A" opacity="0.25"\/>
+          <rect x="110" y="128" width="20" height="20" fill="#DFFF1A" opacity="0.25"\/>
+          <rect x="50" y="148" width="20" height="20" fill="#DFFF1A" opacity="0.25"\/>
+
+          <!-- Routing gate -->
+          <g id="router">
+            <rect x="260" y="100" width="120" height="40" fill="#111110" stroke="#DFFF1A" stroke-width="1.5"\/>
+            <text x="320" y="125" fill="#DFFF1A" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="500" text-anchor="middle">Routing gate</text>
+          </g>
+
+          <!-- Arrow dense to router -->
+          <path d="M150 120 L260 120" stroke="#8A8474" stroke-width="1.5" stroke-dasharray="4 3"\/>
+          <polygon points="256,116 264,120 256,124" fill="#8A8474"\/>
+
+          <!-- Sparse attention label -->
+          <text x="490" y="32" fill="#8A8474" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="500">Sparse attention (linear)</text>
+          <!-- Sparse grid -->
+          <g id="sparse" stroke="#33332E" stroke-width="1">
+            <rect x="430" y="48" width="120" height="120"\/>
+            <line x1="30" y1="68" x2="150" y2="68" transform="translate(400,0)"\/>
+            <line x1="30" y1="88" x2="150" y2="88" transform="translate(400,0)"\/>
+            <line x1="30" y1="108" x2="150" y2="108" transform="translate(400,0)"\/>
+            <line x1="30" y1="128" x2="150" y2="128" transform="translate(400,0)"\/>
+            <line x1="30" y1="148" x2="150" y2="148" transform="translate(400,0)"\/>
+            <line x1="50" y1="48" x2="50" y2="168" transform="translate(400,0)"\/>
+            <line x1="70" y1="48" x2="70" y2="168" transform="translate(400,0)"\/>
+            <line x1="90" y1="48" x2="90" y2="168" transform="translate(400,0)"\/>
+            <line x1="110" y1="48" x2="110" y2="168" transform="translate(400,0)"\/>
+            <line x1="130" y1="48" x2="130" y2="168" transform="translate(400,0)"\/>
+          </g>
+          <!-- sparse dots (selected cells) -->
+          <rect x="430" y="48" width="20" height="20" fill="#DFFF1A" opacity="0.85"\/>
+          <rect x="470" y="88" width="20" height="20" fill="#DFFF1A" opacity="0.85"\/>
+          <rect x="510" y="128" width="20" height="20" fill="#DFFF1A" opacity="0.85"\/>
+          <rect x="450" y="148" width="20" height="20" fill="#DFFF1A" opacity="0.85"\/>
+
+          <!-- Arrow router to sparse -->
+          <path d="M380 120 L430 120" stroke="#DFFF1A" stroke-width="1.5"\/>
+          <polygon points="426,116 434,120 426,124" fill="#DFFF1A"\/>
+
+          <!-- caption -->
+          <text x="340" y="210" fill="#A8A090" font-family="'Inter',sans-serif" font-size="13" text-anchor="middle" font-style="italic">Figure 1. DEER probe uses cosine similarity between decoder</text>
+          <text x="340" y="230" fill="#A8A090" font-family="'Inter',sans-serif" font-size="13" text-anchor="middle" font-style="italic">embeddings to score relational triples in linear time.</text>
+        </svg>
+      </figure>
+
+      <hr class="section-divider">
+
+      <div class="prose">
+        <ul>
+          <li>O(n²) → O(n) scaling for knowledge probes</li>
+          <li>Probes relational knowledge with decoder embeddings from generative PLMs</li>
+          <li>Supports rank-based metrics (Hit@k), not just accuracy</li>
+          <li>Handles multi-token entities and disambiguates homographic names</li>
+        </ul>
+      </div>
+
+      <hr class="section-divider">
+
+      <h2 class="section-heading">Abstract</h2>
+
+      <div class="prose">
+        <p>Existing probes for generative PLMs scale quadratically O(n²) with the number of entities, limiting usable knowledge-graph size.</p>
+
+        <p>DEER uses decoder embeddings for linear O(n) probing with rank-based metrics, multi-token support, and automatic disambiguation of homographic names. Empirically correlates with existing probes.</p>
+      </div>
+
+      <div class="action-box">
+        <p>Read the full paper on arXiv for complete methodology, ablations, and citations.</p>
+        <a href="https://aclanthology.org/2026.eacl-long.382.pdf" class="gem-c-button" target="_blank" rel="noopener">
+          Read full paper
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+    </article>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="#" aria-label="Feed">
+      <div class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+      <span class="nav-label">Feed</span>
+    </a>
+    <a href="#" class="active" aria-label="Saved">
+      <div class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div>
+      <span class="nav-label">Saved</span>
+    </a>
+    <a href="#" aria-label="Explore">
+      <div class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+      <span class="nav-label">Explore</span>
+    </a>
+    <a href="#" aria-label="Profile">
+      <div class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <span class="nav-label">Profile</span>
+    </a>
+  <!-- Floating chat FAB -->
+  <button class="chat-fab" id="chat-fab" aria-label="Ask about this paper">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  </button>
+
+  <!-- Chat overlay -->
+  <div class="chat-overlay" id="chat-overlay" hidden></div>
+
+  <!-- Chat drawer -->
+  <div class="chat-drawer" id="chat-drawer" hidden>
+    <div class="chat-header">
+      <span class="chat-title">Ask about this paper</span>
+      <button class="chat-close" id="chat-close" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-msg chat-msg-bot">What would you like to know about this paper?</div>
+    </div>
+    <div class="chat-footer">
+      <input type="text" class="chat-input" id="chat-input" placeholder="Ask anything..." autocomplete="off">
+      <button class="chat-send" id="chat-send" aria-label="Send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  </nav>
+
+</div>
+
+<script>
+/* bottom-nav active toggle */
+document.querySelectorAll('.bottom-nav a').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelectorAll('.bottom-nav a').forEach(l => l.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+/* ── Chat drawer ── */
+(function() {
+  const fab       = document.getElementById('chat-fab');
+  const overlay   = document.getElementById('chat-overlay');
+  const drawer    = document.getElementById('chat-drawer');
+  const closeBtn  = document.getElementById('chat-close');
+  const input     = document.getElementById('chat-input');
+  const sendBtn   = document.getElementById('chat-send');
+  const messages  = document.getElementById('chat-messages');
+
+  function openDrawer() {
+    overlay.hidden = false;
+    drawer.hidden = false;
+    // force reflow
+    void overlay.offsetWidth;
+    overlay.classList.add('is-visible');
+    drawer.classList.add('is-open');
+    input.focus();
+  }
+
+  function closeDrawer() {
+    overlay.classList.remove('is-visible');
+    drawer.classList.remove('is-open');
+    setTimeout(() => {
+      overlay.hidden = true;
+      drawer.hidden = true;
+    }, 250);
+  }
+
+  fab.addEventListener('click', openDrawer);
+  closeBtn.addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+
+  function addUserBubble(text) {
+    const div = document.createElement('div');
+    div.className = 'chat-msg chat-msg-user';
+    div.textContent = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function addBotBubble(text) {
+    const div = document.createElement('div');
+    div.className = 'chat-msg chat-msg-bot';
+    div.textContent = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function addLoading() {
+    const div = document.createElement('div');
+    div.className = 'chat-loading';
+    div.id = 'chat-loading';
+    div.innerHTML = '<span></span><span></span><span></span>';
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+    return div;
+  }
+
+  function removeLoading() {
+    const el = document.getElementById('chat-loading');
+    if (el) el.remove();
+  }
+
+  function doSend() {
+    const q = input.value.trim();
+    if (!q) return;
+    addUserBubble(q);
+    input.value = '';
+    input.disabled = true;
+    sendBtn.disabled = true;
+    const loader = addLoading();
+
+    // TODO: replace with actual LLM endpoint
+    // const body = JSON.stringify({ paper_id: '2026.eacl-long.382', question: q });
+    // fetch('/api/ask', { method:'POST', headers:{'Content-Type':'application/json'}, body })
+    //   .then(r=>r.json()).then(d=>{ addBotBubble(d.answer); }).catch(...)
+
+    setTimeout(() => {
+      removeLoading();
+      addBotBubble('This is a placeholder answer. Wire this up to your LLM backend by replacing the doSend() fetch call in the script block.');
+      input.disabled = false;
+      sendBtn.disabled = false;
+      input.focus();
+    }, 1400);
+  }
+
+  sendBtn.addEventListener('click', doSend);
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doSend();
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#111110">
+<title>Neosis Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #111110;
+  --surface: #1C1C1A;
+  --surface-hover: #242422;
+  --fg: #F0EBE0;
+  --fg-secondary: #A4A090;
+  --fg-tertiary: #888870;
+  --accent: #DFFF1A;
+  --accent-hover: #EAFF4D;
+  --accent-bg: rgba(223,255,26,0.06);
+  --accent-border: rgba(223,255,26,0.22);
+  --border-solid: #3A3A38;
+  --focus-ring: 0 0 0 3px rgba(223,255,26,0.35);
+  --font-sans: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; }
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+  height: 100%;
+  overflow: hidden;
+}
+::selection { background: var(--accent); color: #111110; }
+
+/* ── Focus rings (design system: --focus-ring) ── */
+button:focus-visible,
+a:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ── Reduced motion (design system: instant when prefers-reduced-motion) ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .snap-container { scroll-behavior: auto; }
+}
+
+/* ── Cinematic overlays ── */
+.grain-overlay {
+  position: fixed;
+  inset: -100%;
+  pointer-events: none;
+  z-index: 50;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  animation: grain-dance 8s steps(10) infinite;
+}
+@keyframes grain-dance {
+  0%,100% { transform: translate(0,0) }
+  10% { transform: translate(-5%,-10%) }
+  20% { transform: translate(-15%,5%) }
+  30% { transform: translate(7%,-25%) }
+  40% { transform: translate(-5%,25%) }
+  50% { transform: translate(-15%,10%) }
+  60% { transform: translate(15%,0%) }
+  70% { transform: translate(0%,15%) }
+  80% { transform: translate(3%,35%) }
+  90% { transform: translate(-10%,10%) }
+}
+.vignette-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+  background: radial-gradient(circle at 50% 40%, transparent 30%, rgba(0,0,0,0.45) 100%);
+}
+
+/* ── Snap container ── */
+.snap-container {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: 100vh;
+  height: 100dvh;
+  position: relative;
+  z-index: 10;
+}
+.snap-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  height: 100vh;
+  height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  contain: content;
+}
+
+/* ── Hero section ── */
+.hero-section {
+  align-items: center;
+  justify-content: center;
+  text-align: left;
+  overflow: visible;
+}
+.hero-watermark {
+  position: absolute;
+  font-size: 22vw;
+  font-weight: 800;
+  color: var(--fg);
+  opacity: 0.03;
+  letter-spacing: -0.03em;
+  line-height: 0.85;
+  user-select: none;
+  pointer-events: none;
+  z-index: 1;
+  white-space: nowrap;
+}
+.hero-content {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  padding: 32px;
+}
+.hero-rule {
+  width: 40px;
+  height: 3px;
+  background: var(--accent);
+  margin-bottom: 16px;
+}
+.hero-tagline {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+  margin-bottom: 8px;
+}
+.hero-title {
+  font-size: clamp(48px, 14vw, 72px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.hero-sub {
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--fg-secondary);
+  max-width: 320px;
+}
+.hero-scroll {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 20;
+  opacity: 0.45;
+}
+.hero-scroll-text {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+}
+.hero-scroll-line {
+  width: 1px;
+  height: 32px;
+  background: var(--border-solid);
+  animation: pulse-line 2.5s linear infinite;
+}
+@keyframes pulse-line {
+  0%,100% { transform: scaleY(0.6); opacity: 0.3; }
+  50% { transform: scaleY(1); opacity: 0.8; }
+}
+
+/* ── Hero entrance ── */
+.hero-rule,
+.hero-tagline,
+.hero-title,
+.hero-sub {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}
+.hero-scroll {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}
+.hero-watermark {
+  opacity: 0;
+}
+.hero-loaded .hero-watermark {
+  opacity: 0.03;
+}
+.hero-loaded .hero-rule {
+  opacity: 1;
+  transition-delay: 0.08s;
+}
+.hero-loaded .hero-tagline {
+  opacity: 1;
+  transition-delay: 0.16s;
+}
+.hero-loaded .hero-title {
+  opacity: 1;
+  transition-delay: 0.24s;
+}
+.hero-loaded .hero-sub {
+  opacity: 1;
+  transition-delay: 0.32s;
+}
+.hero-loaded .hero-scroll {
+  opacity: 0.45;
+  transition-delay: 0.48s;
+}
+
+/* ── Paper sections ── */
+.paper-section {
+  justify-content: flex-end;
+  background: var(--bg);
+}
+.paper-content {
+  position: relative;
+  z-index: 10;
+  margin-top: auto;
+  padding: 0 24px 80px;
+  width: 100%;
+}
+
+/* ── Broadcast reveal ── */
+.broadcast-reveal {
+  clip-path: inset(0 100% 0 0);
+  transform: translateX(-24px) scale(0.97);
+  opacity: 0;
+  transition: clip-path 0.28s cubic-bezier(0.1, 0.7, 0.1, 1),
+              transform 0.28s cubic-bezier(0.1, 0.7, 0.1, 1),
+              opacity 0.22s cubic-bezier(0.1, 0.7, 0.1, 1);
+}
+.snap-section.is-active .broadcast-reveal {
+  clip-path: inset(0 0 0 0);
+  transform: translateX(0) scale(1);
+  opacity: 1;
+}
+.broadcast-reveal:nth-child(1) { transition-delay: 0.06s; }
+.broadcast-reveal:nth-child(2) { transition-delay: 0.11s; }
+.broadcast-reveal:nth-child(3) { transition-delay: 0.16s; }
+.broadcast-reveal:nth-child(4) { transition-delay: 0.21s; }
+.broadcast-reveal:nth-child(5) { transition-delay: 0.26s; }
+.broadcast-reveal:nth-child(6) { transition-delay: 0.31s; }
+.broadcast-reveal:nth-child(7) { transition-delay: 0.36s; }
+
+/* ── Telemetry line ── */
+.telemetry-line {
+  width: 0;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.5;
+  margin-bottom: 16px;
+  transition: width 0.32s cubic-bezier(0.1, 0.7, 0.1, 1);
+  transition-delay: 0.28s;
+}
+.snap-section.is-active .telemetry-line {
+  width: 48px;
+}
+
+/* ── F1 sweep ── */
+.f1-sweep {
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(223,255,26,0.15), var(--accent), rgba(223,255,26,0.15), transparent);
+  z-index: 20;
+  pointer-events: none;
+  transform: skewX(-18deg);
+}
+.snap-section.is-active .f1-sweep {
+  animation: sweep-reveal 0.5s linear forwards;
+}
+
+@keyframes sweep-reveal {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* ── Venue badge ── */
+.venue-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.venue-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--accent);
+  padding: 5px 10px;
+  font-weight: 500;
+}
+.citation-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-tertiary);
+}
+.citation-count strong {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ── Paper title ── */
+.paper-title {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  margin-bottom: 8px;
+}
+
+/* ── Paper subtitle / long title ── */
+.paper-subtitle {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--fg-secondary);
+  margin-bottom: 16px;
+  max-width: 320px;
+}
+
+/* ── Paper abstract ── */
+.paper-abstract {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--fg);
+  margin-bottom: 0;
+  max-width: 340px;
+  max-height: 3.2em;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.1, 0.7, 0.1, 1);
+}
+.paper-abstract.expanded {
+  max-height: 200px;
+}
+
+/* ── Read more toggle ── */
+.readmore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--fg-tertiary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 16px auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: opacity 0.15s linear;
+}
+.readmore svg {
+  display: block;
+}
+.readmore:active {
+  opacity: 0.6;
+}
+.readmore.expanded {
+  display: none;
+}
+
+/* ── Tags inside abstract block ── */
+.collapsed-tags {
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 8px;
+  margin-bottom: 16px;
+}
+.abstract-block.expanded .collapsed-tags {
+  display: flex;
+}
+
+/* ── Actions ── */
+.action-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.btn {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 20px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s linear;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--bg);
+  flex: 1;
+}
+.btn-primary:active {
+  background: var(--accent-hover);
+  transform: scale(0.96);
+}
+.btn-secondary {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--fg);
+  flex: 1;
+}
+.btn-secondary:active {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(0.96);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--fg-tertiary);
+  border: 1px solid var(--border-solid);
+  width: 48px;
+  padding: 0;
+}
+.btn-ghost:active {
+  border-color: var(--accent-border);
+  color: var(--accent);
+  transform: scale(0.96);
+}
+.btn-ghost.saved {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+.action-bar:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Tags ── */
+.paper-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border: 1px solid var(--border-solid);
+  color: var(--fg-tertiary);
+}
+
+/* ── Bottom nav ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  height: 60px;
+  background: rgba(17,17,16,0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-solid);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.bottom-nav a {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-decoration: none;
+  color: var(--fg-tertiary);
+  transition: all 0.15s linear;
+  position: relative;
+}
+.bottom-nav a.active {
+  color: var(--accent);
+}
+.bottom-nav a::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 0; height: 2px;
+  background: var(--accent);
+  transition: width 0.15s linear;
+}
+.bottom-nav a.active::before {
+  width: 24px;
+}
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Scrollbar ── */
+.snap-container::-webkit-scrollbar { display: none; }
+.snap-container { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Section end ── */
+.end-section {
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  opacity: 0.4;
+}
+.end-mark {
+  width: 32px;
+  height: 2px;
+  background: var(--accent);
+}
+.end-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+}
+</style>
+</head>
+<body>
+
+<div class="grain-overlay"></div>
+<div class="vignette-overlay"></div>
+
+<main class="snap-container" id="feed">
+
+<!-- ═══════ HERO ═══════ -->
+<section class="snap-section hero-section is-active" id="hero">
+  <div class="hero-watermark">ARCHIVE</div>
+  <div class="hero-content">
+    <div class="hero-rule"></div>
+    <div class="hero-tagline">Paper feed &middot; v0.1</div>
+    <h1 class="hero-title">Neosis<br>Archive</h1>
+    <p class="hero-sub">Fortune favours the well-informed. A feed for researchers who ship.</p>
+  </div>
+  <div class="hero-scroll">
+    <span class="hero-scroll-text">Scroll</span>
+    <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- ═══════ PAPER 1 ═══════ -->
+<section class="snap-section paper-section">
+  <div class="f1-sweep"></div>
+  <div class="paper-content">
+    <div class="broadcast-reveal venue-badge">
+      <span class="venue-tag">NeurIPS 2017</span>
+      <span class="citation-count"><strong>127K+</strong> citations</span>
+    </div>
+    <h2 class="broadcast-reveal paper-title">
+      Attention Is All You Need
+    </h2>
+    <p class="broadcast-reveal paper-subtitle">
+      Vaswani et al. · Google Brain / Google Research
+    </p>
+    <div class="broadcast-reveal"><div class="telemetry-line"></div></div>
+    <div class="broadcast-reveal abstract-block">
+      <p class="paper-abstract">Proposes the <span class="accent">Transformer</span>, a network architecture based <span class="accent">solely on attention</span> — no recurrence, no convolutions. Achieves <span class="accent">28.4 BLEU</span> on WMT 2014 EN→DE and <span class="accent">41.8 BLEU</span> on EN→FR, training in <span class="accent">3.5 days on 8 GPUs</span>.</p>
+      <div class="collapsed-tags">
+        <span class="tag">Attention</span>
+        <span class="tag">NMT</span>
+        <span class="tag">Efficiency</span>
+      </div>
+      <button class="readmore" onclick="toggleReadMore(this)" aria-label="Expand">Read more<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+    </div>
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-primary">Read Summary →</button>
+    </div>
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-secondary">PDF</button>
+      <button class="btn btn-ghost" onclick="toggleSave(this)" aria-label="Save paper">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ PAPER 2 ═══════ -->
+<section class="snap-section paper-section">
+  <div class="f1-sweep"></div>
+  <div class="paper-content">
+    <div class="broadcast-reveal venue-badge">
+      <span class="venue-tag">EACL 2026</span>
+      <span class="citation-count"></span>
+    </div>
+    <h2 class="broadcast-reveal paper-title">
+      Cosine Similarity as Logits?
+    </h2>
+    <p class="broadcast-reveal paper-subtitle">
+      A Scalable Knowledge Probe Using Embedding Vectors from Generative Language Models
+    </p>
+    <div class="broadcast-reveal"><div class="telemetry-line"></div></div>
+    <div class="broadcast-reveal abstract-block">
+      <p class="paper-abstract">Proposes <span class="accent">DEER probe</span>: a <span class="accent">O(n)</span> knowledge probe using decoder embedding vectors instead of logits. Supports <span class="accent">Hit@k</span> evaluation, multi-token entities, and disambiguation of homographic tail names.</p>
+      <div class="collapsed-tags">
+        <span class="tag">Knowledge probing</span>
+        <span class="tag">Embeddings</span>
+        <span class="tag">Scalability</span>
+      </div>
+      <button class="readmore" onclick="toggleReadMore(this)" aria-label="Expand">Read more<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+    </div>
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-primary">Read Summary →</button>
+    </div>
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-secondary">PDF</button>
+      <button class="btn btn-ghost" onclick="toggleSave(this)" aria-label="Save paper">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ PAPER 3 ═══════ -->
+<section class="snap-section paper-section">
+  <div class="f1-sweep"></div>
+  <div class="paper-content">
+    <div class="broadcast-reveal venue-badge">
+      <span class="venue-tag">arXiv 2512.01316</span>
+      <span class="citation-count"></span>
+    </div>
+    <h2 class="broadcast-reveal paper-title">
+      Agreement-Constrained MBR Decoding
+    </h2>
+    <p class="broadcast-reveal paper-subtitle">
+      Agreement-Constrained Probabilistic Minimum Bayes Risk Decoding
+    </p>
+    <div class="broadcast-reveal"><div class="telemetry-line"></div></div>
+    <div class="broadcast-reveal abstract-block">
+      <p class="paper-abstract"><span class="accent">AC-PMBR</span> leverages a distilled model to guide score-matrix completion. Reduces <span class="accent">approximation error by 3×</span> over PMBR at comparable cost on WMT'23 <span class="accent">En↔De</span>.</p>
+      <div class="collapsed-tags">
+        <span class="tag">MBR decoding</span>
+        <span class="tag">Distillation</span>
+        <span class="tag">MT</span>
+      </div>
+      <button class="readmore" onclick="toggleReadMore(this)" aria-label="Expand">Read more<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+    </div>
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-primary">Read Summary →</button>
+    </div>
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-secondary">PDF</button>
+      <button class="btn btn-ghost saved" onclick="toggleSave(this)" aria-label="Unsave paper">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ PAPER 4 ═══════ -->
+<section class="snap-section paper-section">
+  <div class="f1-sweep"></div>
+  <div class="paper-content">
+    <div class="broadcast-reveal venue-badge">
+      <span class="venue-tag">arXiv</span>
+      <span class="citation-count"><strong>312</strong> citations</span>
+    </div>
+    <h2 class="broadcast-reveal paper-title">
+      Infinite Context, Finite Memory
+    </h2>
+    <p class="broadcast-reveal paper-subtitle">
+      Infini-Attention: Attending to Infinitely Long Contexts with Bounded Memory
+    </p>
+    <div class="broadcast-reveal"><div class="telemetry-line"></div></div>
+    <div class="broadcast-reveal abstract-block">
+      <p class="paper-abstract">Attend to <span class="accent">infinitely long contexts</span> with <span class="accent">bounded memory</span>. <span class="accent">Compressive memory</span> plus masked local attention, drop-in for existing architectures.</p>
+      <div class="collapsed-tags">
+        <span class="tag">LLM</span>
+        <span class="tag">Attention</span>
+        <span class="tag">Efficiency</span>
+      </div>
+      <button class="readmore" onclick="toggleReadMore(this)" aria-label="Expand">Read more<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+    </div>
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-primary">Read Summary →</button>
+    </div>
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-secondary">PDF</button>
+      <button class="btn btn-ghost" onclick="toggleSave(this)" aria-label="Save paper">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ PAPER 5 ═══════ -->
+<section class="snap-section paper-section">
+  <div class="f1-sweep"></div>
+  <div class="paper-content">
+    <div class="broadcast-reveal venue-badge">
+      <span class="venue-tag">UIST 2023</span>
+      <span class="citation-count"><strong>1.9K</strong> citations</span>
+    </div>
+    <h2 class="broadcast-reveal paper-title">
+      AI Agents That Live Whole Lives
+    </h2>
+    <p class="broadcast-reveal paper-subtitle">
+      Generative Agents: Interactive Simulacra of Human Behavior
+    </p>
+    <div class="broadcast-reveal"><div class="telemetry-line"></div></div>
+    <div class="broadcast-reveal abstract-block">
+      <p class="paper-abstract">Computational agents that simulate <span class="accent">believable human behavior</span>. They wake up, cook breakfast, head to work. They <span class="accent">form opinions</span> and initiate conversations.</p>
+      <div class="collapsed-tags">
+        <span class="tag">Agents</span>
+        <span class="tag">Simulation</span>
+        <span class="tag">HCI</span>
+      </div>
+      <button class="readmore" onclick="toggleReadMore(this)" aria-label="Expand">Read more<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+    </div>
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-primary">Read Summary →</button>
+    </div>
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-secondary">PDF</button>
+      <button class="btn btn-ghost" onclick="toggleSave(this)" aria-label="Save paper">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ END ═══════ -->
+<section class="snap-section end-section">
+  <div class="end-mark"></div>
+  <p class="end-text">Fortune favours the well-informed</p>
+  <p class="end-text" style="font-size:9px; margin-top:4px;">Neosis Archive v0.1</p>
+</section>
+
+</main>
+
+<!-- ── Bottom Nav ── -->
+<nav class="bottom-nav">
+  <a href="#" class="active" aria-label="Feed">
+    <div class="nav-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    </div>
+    <span class="nav-label">Feed</span>
+  </a>
+  <a href="#" aria-label="Saved">
+    <div class="nav-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <span class="nav-label">Saved</span>
+  </a>
+  <a href="#" aria-label="Explore">
+    <div class="nav-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    </div>
+    <span class="nav-label">Explore</span>
+  </a>
+  <a href="#" aria-label="Profile">
+    <div class="nav-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <span class="nav-label">Profile</span>
+  </a>
+</nav>
+
+<script>
+const feedEl = document.getElementById('feed');
+let lastScrollY = feedEl ? feedEl.scrollTop : 0;
+
+const observer = new IntersectionObserver((entries) => {
+  const currentScrollY = feedEl ? feedEl.scrollTop : 0;
+  const scrollingDown = currentScrollY >= lastScrollY;
+
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.f1-sweep').forEach(sweep => {
+        // Force animation reset so it replays every time we scroll down into the section
+        sweep.style.animation = 'none';
+        void sweep.offsetHeight; // trigger reflow
+        if (!scrollingDown) {
+          sweep.style.animation = 'none';
+        } else {
+          sweep.style.animation = '';
+        }
+      });
+      entry.target.classList.add('is-active');
+    } else {
+      entry.target.classList.remove('is-active');
+      entry.target.querySelectorAll('.f1-sweep').forEach(sweep => {
+        sweep.style.animation = '';
+      });
+    }
+  });
+
+  lastScrollY = currentScrollY;
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.snap-section').forEach(s => observer.observe(s));
+
+/* Hero entrance */
+window.addEventListener('load', () => {
+  document.getElementById('hero').classList.add('hero-loaded');
+});
+
+/* Hero scroll-linked transforms */
+(function heroScroll() {
+  const hero = document.getElementById('hero');
+  const feed = document.getElementById('feed');
+  if (!hero || !feed) return;
+
+  const wm = hero.querySelector('.hero-watermark');
+  const content = hero.querySelector('.hero-content');
+  const scrollCue = hero.querySelector('.hero-scroll');
+  const vh = () => window.innerHeight;
+
+  function update() {
+    const rect = hero.getBoundingClientRect();
+    const p = Math.max(0, Math.min(1, -rect.top / vh())); // 0=visible, 1=scrolled past
+
+    if (content) {
+      // Content exits faster -> depth
+      const cy = -p * 45;   // vh
+      const cs = 1 - p * 0.1;
+      const ca = 1 - p * 1.3;
+      content.style.transform = `translateY(${cy}vh) scale(${cs})`;
+      content.style.opacity = Math.max(0, ca);
+    }
+
+    if (wm) {
+      // Watermark drifts slower (background-ish)
+      const wy = -p * 15;
+      const wa = 0.03 * (1 - p);
+      wm.style.transform = `translateY(${wy}vh)`;
+      wm.style.opacity = Math.max(0, wa);
+    }
+
+    if (scrollCue) {
+      // Cue fades out fast
+      const sy = -p * 30;
+      const sa = 0.45 * Math.max(0, 1 - p * 4);
+      scrollCue.style.transform = `translateX(-50%) translateY(${sy}vh)`;
+      scrollCue.style.opacity = Math.max(0, sa);
+    }
+  }
+
+  feed.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  // Run once after entrance delay
+  setTimeout(update, 600);
+})();
+
+function toggleSave(btn) {
+  const saved = btn.classList.toggle('saved');
+  btn.setAttribute('aria-label', saved ? 'Unsave paper' : 'Save paper');
+  const svg = btn.querySelector('svg');
+  svg.setAttribute('fill', saved ? 'currentColor' : 'none');
+}
+
+function toggleReadMore(btn) {
+  const block = btn.closest('.abstract-block');
+  const abstract = block.querySelector('.paper-abstract');
+  abstract.classList.toggle('expanded');
+  btn.classList.toggle('expanded');
+  block.classList.toggle('expanded');
+}
+
+document.querySelectorAll('.bottom-nav a').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelectorAll('.bottom-nav a').forEach(l => l.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>
