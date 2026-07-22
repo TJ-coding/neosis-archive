@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#111110">
-<title>Cosine Similarity as Logits? — Neosis Archive</title>
+<title>Attention Is All You Need — Neosis Archive</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -409,6 +409,170 @@ a:focus-visible, button:focus-visible {
   * { animation: none !important; transition: none !important; }
   .chat-loading span { animation: none !important; }
 }
+
+/* ── Citation triggers ── */
+.citation-trigger {
+  cursor: pointer;
+  position: relative;
+  transition: color .15s ease, background .15s ease;
+  border-radius: 4px;
+  padding: 0 4px;
+  margin-left: -4px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.citation-trigger:hover {
+  color: var(--accent);
+  background: rgba(223,255,26,0.05);
+}
+.citation-active {
+  color: var(--accent);
+  background: rgba(223,255,26,0.08);
+}
+.prose li.citation-trigger {
+  margin-bottom: 8px;
+  padding: 2px 4px;
+}
+
+/* ── Citation sheet overlay ── */
+.citation-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(0,0,0,0.4);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+.citation-sheet-overlay[hidden] { display: none; }
+.citation-sheet-overlay.is-visible { opacity: 1; }
+
+/* ── Citation sheet ── */
+.citation-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-top: 1px solid var(--border-solid);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  transform: translateY(100%);
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
+}
+.citation-sheet.is-open { transform: translateY(0); }
+.citation-sheet[hidden] { display: none; }
+
+.citation-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-solid);
+}
+.citation-sheet-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fg);
+}
+.citation-sheet-close {
+  background: none;
+  border: none;
+  color: var(--fg-secondary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+}
+.citation-sheet-close:hover { color: var(--fg); }
+
+.citation-sheet-body {
+  padding: 20px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+}
+.citation-sheet-body::-webkit-scrollbar { display: none; }
+
+.citation-blockquote {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--fg);
+  border-left: 3px solid var(--accent);
+  padding-left: 16px;
+  margin: 0 0 16px 0;
+  font-style: italic;
+}
+.citation-source-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-tertiary);
+  margin-bottom: 8px;
+}
+.citation-meta {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fg-secondary);
+  margin-bottom: 20px;
+}
+.citation-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 10px 16px;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border-solid);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+.citation-copy-btn:hover {
+  border-color: var(--accent);
+}
+.citation-copy-btn.is-copied {
+  background: rgba(223,255,26,0.10);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Citation actions row ── */
+.citation-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.citation-goto-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 10px 16px;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border-solid);
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .15s ease, border-color .15s ease;
+}
+.citation-goto-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 </style>
 </head>
 <body>
@@ -428,16 +592,16 @@ a:focus-visible, button:focus-visible {
   <main class="main-scroll">
     <article class="page">
 
-      <h1 class="page-title">Cosine Similarity as Logits? A Scalable Knowledge Probe Using <span class="accent">Embedding Vectors</span> from Generative Language Models</h1>
+      <h1 class="page-title"><span class="accent">Attention</span> Is All You Need</h1>
 
       <div class="meta-strip">
-        Jinno, Hayashi, Sakai, Kamigaito, Watanabe
+        Vaswani, Shazeer, Parmar, Uszkoreit, Jones, Gomez, Kaiser, Polosukhin
         <span class="sep">·</span>
-        EACL 2026
+        NeurIPS 2017
         <span class="sep">·</span>
-        <a href="https://aclanthology.org/2026.eacl-long.382/">2026.eacl-long.382</a>
+        <a href="https://arxiv.org/abs/1706.03762">arXiv:1706.03762</a>
         <span class="sep">·</span>
-        pp. 8188–8200
+        pp. 5998–6008
       </div>
 
       <figure class="paper-figure">
@@ -514,10 +678,30 @@ a:focus-visible, button:focus-visible {
 
       <div class="prose">
         <ul>
-          <li>O(n²) → O(n) scaling for knowledge probes</li>
-          <li>Probes relational knowledge with decoder embeddings from generative PLMs</li>
-          <li>Supports rank-based metrics (Hit@k), not just accuracy</li>
-          <li>Handles multi-token entities and disambiguates homographic names</li>
+          <li class="citation-trigger"
+              data-quote="The dominant sequence transduction models are based on complex recurrent or convolutional neural networks that include an encoder and a decoder. The best performing models also connect the encoder and decoder through an attention mechanism."
+              data-search="recurrent or convolutional"
+              data-page="1" data-section="Abstract" data-line="1">
+            Replaces RNN/CNN encoder-decoder with self-attention mechanism
+          </li>
+          <li class="citation-trigger"
+              data-quote="We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely."
+              data-search="Transformer"
+              data-page="1" data-section="Abstract" data-line="2">
+            Transformer trains in 12 hours on 8 P100s, reaches 28.4 BLEU on WMT 2014 EN-DE
+          </li>
+          <li class="citation-trigger"
+              data-quote="On the WMT 2014 English-to-German translation task, our model achieves 28.4 BLEU, improving over the existing best results, including ensembles, by more than 2.0 BLEU."
+              data-search="28.4 BLEU"
+              data-page="8" data-section="Results" data-line="1">
+            First model to surpass all prior ensemble systems on English-to-German translation
+          </li>
+          <li class="citation-trigger"
+              data-quote="To the best of our knowledge, however, the Transformer is the first transduction model based entirely on self-attention to compute representations of its input and output without using sequence-aligned RNNs or convolution."
+              data-search="first transduction model entirely on self-attention"
+              data-page="1" data-section="Abstract" data-line="4">
+            First sequence transduction model to use only self-attention, no recurrence
+          </li>
         </ul>
       </div>
 
@@ -526,14 +710,24 @@ a:focus-visible, button:focus-visible {
       <h2 class="section-heading">Abstract</h2>
 
       <div class="prose">
-        <p>Existing probes for generative PLMs scale quadratically O(n²) with the number of entities, limiting usable knowledge-graph size.</p>
+        <p class="citation-trigger"
+           data-quote="The dominant sequence transduction models are based on complex recurrent or convolutional neural networks that include an encoder and a decoder."
+           data-search="recurrent or convolutional"
+           data-page="1" data-section="Abstract" data-line="1">
+          The dominant sequence transduction models are based on complex recurrent or convolutional neural networks.
+        </p>
 
-        <p>DEER uses decoder embeddings for linear O(n) probing with rank-based metrics, multi-token support, and automatic disambiguation of homographic names. Empirically correlates with existing probes.</p>
+        <p class="citation-trigger"
+           data-quote="We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely."
+           data-search="Transformer"
+           data-page="1" data-section="Abstract" data-line="2">
+          We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely.
+        </p>
       </div>
 
       <div class="action-box">
         <p>Read the full paper on arXiv for complete methodology, ablations, and citations.</p>
-        <a href="https://aclanthology.org/2026.eacl-long.382.pdf" class="gem-c-button" target="_blank" rel="noopener">
+        <a href="https://arxiv.org/pdf/1706.03762.pdf" class="gem-c-button" target="_blank" rel="noopener">
           Read full paper
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
         </a>
@@ -559,36 +753,63 @@ a:focus-visible, button:focus-visible {
       <div class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
       <span class="nav-label">Profile</span>
     </a>
-  <!-- Floating chat FAB -->
-  <button class="chat-fab" id="chat-fab" aria-label="Ask about this paper">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-  </button>
-
-  <!-- Chat overlay -->
-  <div class="chat-overlay" id="chat-overlay" hidden></div>
-
-  <!-- Chat drawer -->
-  <div class="chat-drawer" id="chat-drawer" hidden>
-    <div class="chat-header">
-      <span class="chat-title">Ask about this paper</span>
-      <button class="chat-close" id="chat-close" aria-label="Close">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <div class="chat-messages" id="chat-messages">
-      <div class="chat-msg chat-msg-bot">What would you like to know about this paper?</div>
-    </div>
-    <div class="chat-footer">
-      <input type="text" class="chat-input" id="chat-input" placeholder="Ask anything..." autocomplete="off">
-      <button class="chat-send" id="chat-send" aria-label="Send">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-      </button>
-    </div>
-  </div>
-
   </nav>
 
 </div>
+
+<!-- Floating chat FAB — must be body child -->
+<button type="button" class="chat-fab" id="chat-fab" aria-label="Ask about this paper">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+</button>
+
+<!-- Chat overlay -->
+<div class="chat-overlay" id="chat-overlay" hidden></div>
+
+<!-- Chat drawer -->
+<div class="chat-drawer" id="chat-drawer" hidden>
+  <div class="chat-header">
+    <span class="chat-title">Ask about this paper</span>
+    <button type="button" class="chat-close" id="chat-close" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <div class="chat-msg chat-msg-bot">What would you like to know about this paper?</div>
+  </div>
+  <div class="chat-footer">
+    <input type="text" class="chat-input" id="chat-input" placeholder="Ask anything..." autocomplete="off">
+    <button type="button" class="chat-send" id="chat-send" aria-label="Send">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Citation sheet -->
+<div class="citation-sheet-overlay" id="citation-overlay" hidden></div>
+<div class="citation-sheet" id="citation-sheet" hidden>
+  <div class="citation-sheet-header">
+    <span class="citation-sheet-title">Citation</span>
+    <button type="button" class="citation-sheet-close" id="citation-close" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="citation-sheet-body" id="citation-body">
+    <div class="citation-source-label" id="citation-source">Line 1 — Abstract</div>
+    <blockquote class="citation-blockquote" id="citation-quote"></blockquote>
+    <div class="citation-meta" id="citation-meta"></div>
+    <div class="citation-actions">
+      <button type="button" class="citation-copy-btn" id="citation-copy">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span id="citation-copy-label">Copy citation</span>
+      </button>
+      <a class="citation-goto-btn" id="citation-goto" href="#" target="_blank" rel="noopener" aria-label="Open PDF at this page">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
+        <span id="citation-goto-label">Go to PDF page</span>
+      </a>
+    </div>
+  </div>
+</div>
+
 
 <script>
 /* bottom-nav active toggle */
@@ -610,11 +831,12 @@ document.querySelectorAll('.bottom-nav a').forEach(link => {
   const sendBtn   = document.getElementById('chat-send');
   const messages  = document.getElementById('chat-messages');
 
+
   function openDrawer() {
     overlay.hidden = false;
     drawer.hidden = false;
-    // force reflow
-    void overlay.offsetWidth;
+    // force reflow for both elements so transitions fire
+    void drawer.offsetWidth;
     overlay.classList.add('is-visible');
     drawer.classList.add('is-open');
     input.focus();
@@ -629,7 +851,7 @@ document.querySelectorAll('.bottom-nav a').forEach(link => {
     }, 250);
   }
 
-  fab.addEventListener('click', openDrawer);
+  fab.addEventListener('click', function(e) { console.log('[Chat] FAB clicked'); openDrawer(); });
   closeBtn.addEventListener('click', closeDrawer);
   overlay.addEventListener('click', closeDrawer);
 
@@ -692,7 +914,111 @@ document.querySelectorAll('.bottom-nav a').forEach(link => {
     if (e.key === 'Enter') doSend();
   });
 })();
+
+
+/* ── Citation sheet ── */
+(function() {
+  const overlay    = document.getElementById('citation-overlay');
+  const sheet      = document.getElementById('citation-sheet');
+  const closeBtn   = document.getElementById('citation-close');
+  const quoteEl    = document.getElementById('citation-quote');
+  const metaEl     = document.getElementById('citation-meta');
+  const sourceEl   = document.getElementById('citation-source');
+  const copyBtn    = document.getElementById('citation-copy');
+  const copyLabel  = document.getElementById('citation-copy-label');
+  const triggers   = document.querySelectorAll('.citation-trigger');
+
+
+  let activeTrigger = null;
+  let originalText  = '';
+
+  function openSheet(el) {
+    const quote   = el.dataset.quote;
+    const page    = el.dataset.page;
+    const section = el.dataset.section;
+    const line    = el.dataset.line || '—';
+
+    quoteEl.textContent = quote;
+    metaEl.textContent = 'Jinno et al., EACL 2026 · pp. ' + page;
+    sourceEl.textContent = 'Line ' + line + ' — ' + (section || 'Body');
+
+    // Build PDF anchor: page jump + text search highlight
+    // Chrome/Firefox/Edge PDF viewers support #search=query
+    const firstPage = 8188;
+    const pdfPage = Math.max(1, parseInt(page, 10) - firstPage + 1);
+    // PDF text highlight via #search="..." fragment
+    const searchText = (el.dataset.search || quote).substring(0, 200).replace(/"/g, '\"');
+    const gotoBtn = document.getElementById('citation-goto');
+    if (gotoBtn) gotoBtn.href = 'https://aclanthology.org/2026.eacl-long.382.pdf#page=' + pdfPage + '&search="' + searchText + '"';
+
+    overlay.hidden = false;
+    sheet.hidden = false;
+    void overlay.offsetWidth;
+    void sheet.offsetWidth;
+    overlay.classList.add('is-visible');
+    sheet.classList.add('is-open');
+
+    activeTrigger = el;
+    el.classList.add('citation-active');
+    originalText = 'Jinno, T., Hayashi, K., Sakai, Y., Kamigaito, H., & Watanabe, T. (2026). Cosine Similarity as Logits? A Scalable Knowledge Probe Using Embedding Vectors from Generative Language Models. In *Proceedings of EACL* (pp. ' + page + '). https://aclanthology.org/2026.eacl-long.382\n\n> ' + quote;
+  }
+
+  function closeSheet() {
+    overlay.classList.remove('is-visible');
+    sheet.classList.remove('is-open');
+    if (activeTrigger) {
+      activeTrigger.classList.remove('citation-active');
+      activeTrigger = null;
+    }
+    setTimeout(() => {
+      overlay.hidden = true;
+      sheet.hidden = true;
+      copyBtn.classList.remove('is-copied');
+      copyLabel.textContent = 'Copy citation';
+    }, 250);
+  }
+
+  triggers.forEach(el => {
+    el.addEventListener('click', function(e) {
+        e.preventDefault();
+      e.stopPropagation();
+      openSheet(this);
+    });
+    el.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openSheet(this);
+    });
+  });
+
+  closeBtn.addEventListener('click', closeSheet);
+  overlay.addEventListener('click', closeSheet);
+
+  copyBtn.addEventListener('click', function() {
+    if (!originalText) return;
+    navigator.clipboard.writeText(originalText).then(() => {
+      copyBtn.classList.add('is-copied');
+      copyLabel.textContent = 'Copied';
+      setTimeout(() => {
+        copyBtn.classList.remove('is-copied');
+        copyLabel.textContent = 'Copy citation';
+      }, 2000);
+    }).catch(() => {
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = originalText;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      copyBtn.classList.add('is-copied');
+      copyLabel.textContent = 'Copied';
+    });
+  });
+})();
+
 </script>
+
 
 </body>
 </html>

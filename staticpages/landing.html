@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111110">
+<title>Neosis Archive — Curated Paper Feed for Researchers | Early Access</title>
+<meta name="description" content="Neosis Archive is a curated feed of research papers for scientists who ship. No algorithmic noise. Author tracking, BLUF summaries, citation alerts. Request early access.">
+<meta name="keywords" content="research papers, arxiv feed, academic papers, paper alerts, author tracking, academic discovery">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://neosisarchive.com/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://neosisarchive.com/">
+<meta property="og:title" content="Neosis Archive — Curated Paper Feed for Researchers">
+<meta property="og:description" content="A curated feed of research papers for scientists who ship. No algorithmic noise. 500 early access spots.">
+<meta property="og:image" content="https://neosisarchive.com/og-image.png">
+<meta property="og:site_name" content="Neosis Archive">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://neosisarchive.com/">
+<meta name="twitter:title" content="Neosis Archive — Curated Paper Feed for Researchers">
+<meta name="twitter:description" content="A curated feed of research papers for scientists who ship. No algorithmic noise. 500 early access spots.">
+<meta name="twitter:image" content="https://neosisarchive.com/og-image.png">
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Neosis Archive",
+  "url": "https://neosisarchive.com/",
+  "description": "A curated feed of research papers for scientists who ship.",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://neosisarchive.com/search?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #111110;
+  --surface: #1C1C1A;
+  --surface-hover: #242422;
+  --fg: #F0EBE0;
+  --fg-secondary: #A4A090;
+  --fg-tertiary: #888870;
+  --accent: #DFFF1A;
+  --accent-hover: #EAFF4D;
+  --accent-bg: rgba(223,255,26,0.06);
+  --accent-border: rgba(223,255,26,0.22);
+  --border-solid: #3A3A38;
+  --focus-ring: 0 0 0 3px rgba(223,255,26,0.35);
+  --font-sans: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; }
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+::selection { background: var(--accent); color: #111110; }
+
+a { color: var(--fg); text-decoration: underline; text-underline-offset: 0.18em; }
+a:hover, a:focus { color: var(--accent-hover); }
+
+.page-wrap {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 48px;
+  background: transparent;
+  transition: background 0.2s linear;
+}
+.header.filled { background: var(--bg); }
+.header-brand {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+.header-brand span { color: var(--accent); }
+.header-links {
+  display: flex;
+  gap: 24px;
+}
+.header-links a {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.1s;
+}
+.header-links a:hover { color: var(--fg-tertiary); }
+
+/* ── Hero ── */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 48px;
+}
+.hero-mark {
+  position: absolute;
+  top: 40px; left: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.hero-mark-line {
+  width: 1px;
+  height: 58px;
+  background: var(--accent);
+}
+.hero-mark-text {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  margin-top: 8px;
+}
+.hero-year {
+  position: absolute;
+  top: 40px; right: 48px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--fg-tertiary);
+}
+.hero-inner {
+  max-width: 800px;
+  position: relative;
+  z-index: 10;
+}
+.hero-issue {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+  margin-bottom: 32px;
+}
+.hero-title {
+  font-family: var(--font-sans);
+  font-size: clamp(56px, 10vw, 144px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.88;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+}
+.hero-tagline {
+  font-family: var(--font-sans);
+  font-size: 22px;
+  font-style: italic;
+  color: var(--fg-secondary);
+  margin-bottom: 48px;
+  max-width: 480px;
+}
+
+/* ── Features ── */
+.features {
+  padding: 120px 48px;
+  border-top: 1px solid var(--border-solid);
+}
+.features-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.features-header {
+  margin-bottom: 80px;
+  max-width: 560px;
+}
+.features-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+  margin-bottom: 16px;
+  display: block;
+}
+.features-title {
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.feature {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  margin-bottom: 160px;
+}
+.feature:last-child { margin-bottom: 0; }
+.feature:nth-child(even) .feature-ui { order: -1; }
+
+.feature-text h3 {
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+.feature-text p {
+  font-size: 18px;
+  color: var(--fg-secondary);
+  line-height: 1.55;
+  max-width: 400px;
+}
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 24px;
+}
+.feature-list li {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-tertiary);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-solid);
+}
+.feature-list li::before {
+  content: '//';
+  color: var(--accent);
+  margin-right: 8px;
+}
+
+/* ── Live preview iframe ── */
+.preview-frame {
+  border: 1px solid var(--border-solid);
+  background: var(--bg);
+  overflow: hidden;
+  position: relative;
+}
+.preview-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+.preview-label {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+  pointer-events: none;
+}
+
+/* ── Phone chrome wrapper ── */
+.device-wrap {
+  border: 1px solid var(--border-solid);
+  padding: 8px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+.device-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px 10px;
+}
+.device-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+}
+
+.device-dots {
+  display: flex;
+  gap: 4px;
+}
+.device-dot {
+  width: 4px;
+  height: 4px;
+  background: var(--fg-tertiary);
+}
+.device-screen {
+  border: 1px solid var(--border-solid);
+  height: 580px;
+  overflow: hidden;
+  position: relative;
+}
+.device-screen iframe {
+  width: 200%;
+  height: 200%;
+  border: none;
+  transform: scale(0.5);
+  transform-origin: top left;
+  display: block;
+}
+
+/* ── Signup section (moved below features) ── */
+.signup {
+  padding: 120px 48px;
+  border-top: 1px solid var(--border-solid);
+}
+.signup-inner {
+  max-width: 800px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+.signup-left .count {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 48px;
+  font-weight: 400;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.signup-left h2 {
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1.22;
+  margin-bottom: 20px;
+}
+.signup-left p {
+  color: var(--fg-secondary);
+  font-size: 18px;
+  line-height: 1.55;
+  max-width: 360px;
+}
+.signup-steps {
+  list-style: none;
+  padding: 0;
+  margin: 32px 0 0;
+}
+.signup-steps li {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fg-secondary);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-solid);
+}
+.signup-steps strong {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+.signup-right {
+  border: 1px solid var(--border-solid);
+  padding: 32px;
+}
+.signup-right h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.form-input {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-solid);
+  background: var(--surface);
+  color: var(--fg);
+  width: 100%;
+  transition: border-color 0.1s;
+}
+.form-input::placeholder { color: var(--fg-tertiary); }
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+.form-btn {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 12px 24px;
+  background: var(--accent);
+  color: #111110;
+  border: none;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.form-btn:hover { background: var(--accent-hover); }
+.form-btn:active { transform: translateY(1px); }
+.form-note {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-tertiary);
+  margin-top: 14px;
+  line-height: 1.6;
+}
+.form-error {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #FF5555;
+  margin-top: 10px;
+  display: none;
+}
+.form-error.show { display: block; }
+.form-success {
+  display: none;
+  padding: 24px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+}
+.form-success.show { display: block; }
+.form-success p {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  line-height: 1.6;
+}
+
+/* ── Open source section ── */
+.opensource {
+  padding: 0 48px 120px;
+}
+.opensource-inner {
+  max-width: 800px;
+  border-top: 1px solid var(--border-solid);
+  padding-top: 64px;
+}
+.opensource h2 {
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1.22;
+  margin-bottom: 20px;
+}
+.opensource p {
+  color: var(--fg-secondary);
+  font-size: 18px;
+  line-height: 1.55;
+  max-width: 480px;
+  margin-bottom: 24px;
+}
+.opensource-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.opensource-list li {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fg-secondary);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-solid);
+}
+.opensource-list strong {
+  color: var(--fg);
+  font-weight: 500;
+}
+
+/* ── Footer ── */
+.footer {
+  padding: 48px;
+  border-top: 1px solid var(--border-solid);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+.footer-left {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-tertiary);
+  line-height: 1.7;
+}
+.footer-links {
+  display: flex;
+  gap: 24px;
+}
+.footer-links a {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-secondary);
+  text-decoration: none;
+}
+.footer-links a:hover { color: var(--accent); }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .feature { grid-template-columns: 1fr; gap: 40px; }
+  .feature:nth-child(even) .feature-ui { order: 0; }
+  .signup-inner { grid-template-columns: 1fr; }
+  .device-wrap { max-width: 340px; }
+  .device-screen { height: 480px; }
+}
+@media (max-width: 780px) {
+  .header { padding: 16px 20px; }
+  .hero { padding: 0 20px; }
+  .hero-mark, .hero-year { display: none; }
+  .features { padding: 80px 20px; }
+  .signup { padding: 80px 20px; }
+  .opensource { padding: 0 20px 80px; }
+  .footer { flex-direction: column; gap: 16px; padding: 32px 20px; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <header class="header" id="header">
+    <div class="header-brand">Neosis <span>Archive</span></div>
+    <nav class="header-links" aria-label="External links">
+      <a href="https://github.com/TJ-coding/neosis-archive" target="_blank" rel="noopener" itemprop="sameAs">GitHub</a>
+      <a href="https://discord.gg/bWZS5QvPYd" target="_blank" rel="noopener" itemprop="sameAs">Discord</a>
+    </nav>
+  </header>
+
+  <!-- ═══════════ HERO ═══════════ -->
+  <section class="hero" id="hero" aria-label="Neosis Archive hero">
+    <div class="hero-mark" aria-hidden="true" style="position: absolute; top: 0; right: 8px;">
+      <div class="hero-mark-line" style="position: absolute; top: 0; right: 0px;"></div>
+    </div>
+    <div class="hero-year">2026</div>
+
+    <div class="hero-inner">
+      <p class="hero-issue">Early Access &middot; Issue 00</p>
+      <h1 class="hero-title">The most<br><span style="color: var(--accent);">beautiful</span><br>paper feed.</h1>
+      <p class="hero-tagline">Machine learned for you.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════ FEATURES / SCREENS ═══════════ -->
+  <section class="features" aria-label="Product features">
+    <div class="features-inner">
+
+      <header class="features-header">
+        <span class="features-label">Product</span>
+        <h2 class="features-title">Optimized for you.</h2>
+      </header>
+
+      <!-- Feature 1: Feed -->
+      <div class="feature">
+        <div class="feature-text">
+          <h3>The feed</h3>
+          <p>A single chronological feed of papers that matter. Summarized into concise headlines.</p>
+          <ul class="feature-list">
+            <li>Preference learning</li>
+            <li>Summary at a glance</li>
+            <li>Swipe to like and dislike</li>
+          </ul>
+        </div>
+        <div class="feature-ui">
+          <div class="device-wrap">
+            <div class="device-header">
+              <span class="device-title">Feed</span>
+              <div class="device-dots"><span class="device-dot"></span><span class="device-dot"></span></div>
+            </div>
+            <div class="device-screen">
+              <iframe src="app_draft.html" loading="lazy" title="Neosis Archive feed" style="
+        transform: scale(1);
+        transform-origin: top left;
+        width: calc(100% / 1);
+        height: calc(100%);
+        border: none;
+    "></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 2: Paper read -->
+      <div class="feature">
+        <div class="feature-text">
+          <h3>Paper read view</h3>
+          <p>Bottom-Line-Up-Front summaries. Tap any claim to see the exact source, page, and supporting context.</p>
+          <ul class="feature-list">
+            <li>Traceable summary</li>
+            <li>Ask an LLM</li>
+          </ul>
+        </div>
+        <div class="feature-ui">
+          <div class="device-wrap">
+            <div class="device-header">
+              <span class="device-title">Read</span>
+              <div class="device-dots"><span class="device-dot"></span><span class="device-dot"></span></div>
+            </div>
+            <div class="device-screen">
+              <iframe src="paper_read.html" loading="lazy" title="Paper read view" style="
+        transform: scale(1);
+        transform-origin: top left;
+        width: calc(100% / 1);
+        height: calc(100%);
+        border: none;
+    "></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 3: Hero / Instrument HUD -->
+      <div class="feature">
+        <div class="feature-text">
+          <h3>Open source</h3>
+          <p>Everything is on GitHub. Read the code, open issues, <a href="https://github.com/tj-coding/neosis-archive/issues/new" target="_blank" rel="noopener noreferrer" style="color: var(--accent)">request features</a>.</p>
+
+        </div>
+        <div class="feature-ui">
+<img
+    src="https://www.svgrepo.com/show/394174/github.svg"
+    style="
+        width:50%;
+        height:50%;
+        margin:0 auto;
+        display:block;
+        filter: invert(100%) sepia(100%) saturate(100%) hue-rotate(0deg) brightness(100%) contrast(100%);
+    "
+    alt="GitHub logo">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════ SIGNUP ═══════════ -->
+  <section class="signup" id="signup-section" aria-label="Request early access" style="margin-left: auto; margin-right: auto;">
+    <div class="signup-inner">
+      <div class="signup-left">
+        <h2>Closed-door access</h2>
+        <span class="count">500 Spots</span>
+        <p>The first 500 researchers get full early access to the app.</p>
+        <ul class="signup-steps">
+          <li><strong>1.</strong> Submit your email and Scholar ID</li>
+          <li><strong>2.</strong> We verify you are a researcher</li>
+          <li><strong>3.</strong> Invite lands in your inbox</li>
+        </ul>
+      </div>
+      <div class="signup-right">
+        <h3>Request access</h3>
+        <form class="form" id="signup" novalidate>
+          <div class="form-row">
+            <input type="email" class="form-input" id="email" placeholder="you@institution.edu" required autocomplete="email">
+            <input type="text" class="form-input" id="gsid" placeholder="Google Scholar ID" required autocomplete="off">
+            <button type="submit" class="form-btn">Request access</button>
+          </div>
+          <div class="form-error" id="err"></div>
+          <div class="form-success" id="ok">
+            <p>You are on the list. Selection is rolling. Check your inbox.</p>
+          </div>
+          <p class="form-note">500 spots. First come, first vetted.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+ 
+
+  <!-- ═══════════ FOOTER ═══════════ -->
+  <footer class="footer" itemscope itemtype="https://schema.org/Organization">
+    <div class="footer-left">
+      <span itemprop="name">Neosis Archive</span><br>
+      Fortune favours the well-informed.
+    </div>
+    <nav class="footer-links" aria-label="External links">
+      <a href="https://github.com/TJ-coding/neosis-archive" target="_blank" rel="noopener" itemprop="sameAs">GitHub</a>
+      <a href="https://discord.gg/bWZS5QvPYd" target="_blank" rel="noopener" itemprop="sameAs">Discord</a>
+    </nav>
+  </footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function() {
+  const header = document.getElementById('header');
+  function onScroll() {
+    header.classList.toggle('filled', window.scrollY > 40);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  const SUPABASE_URL = 'https://evhjycnqgowbyrswjpzo.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_zm0Pd_82BakNnRCYqHkaWg_IEJSN75u';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const form = document.getElementById('signup');
+  const email = document.getElementById('email');
+  const gsid = document.getElementById('gsid');
+  const err = document.getElementById('err');
+  const ok = document.getElementById('ok');
+  const btn = form.querySelector('.form-btn');
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    err.classList.remove('show');
+    ok.classList.remove('show');
+
+    const em = email.value.trim();
+    const gs = gsid.value.trim();
+
+    if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
+      err.textContent = 'Enter a valid email address.';
+      err.classList.add('show');
+      email.focus();
+      return;
+    }
+    if (!gs || gs.length < 3) {
+      err.textContent = 'Enter your Google Scholar ID.';
+      err.classList.add('show');
+      gsid.focus();
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    try {
+      const { error } = await supabase
+        .from('early_access')
+        .insert([{ email: em, scholar_id: gs, created_at: new Date().toISOString() }]);
+
+      if (error) throw error;
+
+      ok.classList.add('show');
+      form.querySelector('.form-row').style.display = 'none';
+      form.querySelector('.form-note').style.display = 'none';
+    } catch (e) {
+      err.textContent = 'Something went wrong. Try again or email us.';
+      err.classList.add('show');
+      btn.disabled = false;
+      btn.textContent = 'Request access';
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -21,6 +21,7 @@
   --accent-bg: rgba(223,255,26,0.06);
   --accent-border: rgba(223,255,26,0.22);
   --border-solid: #3A3A38;
+  --border: var(--border-solid);
   --focus-ring: 0 0 0 3px rgba(223,255,26,0.35);
   --font-sans: 'Inter', -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
@@ -96,8 +97,8 @@ a:focus-visible {
 .snap-section {
   scroll-snap-align: start;
   scroll-snap-stop: always;
-  height: 100vh;
-  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -105,128 +106,299 @@ a:focus-visible {
   contain: content;
 }
 
-/* ── Hero section ── */
-.hero-section {
-  align-items: center;
-  justify-content: center;
-  text-align: left;
-  overflow: visible;
+/* ═══════════ HERO ═══════════ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+  padding-bottom: 80px;
 }
+
+/* Layer 1: Constellation */
+.hero-constellation {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 1;
+  will-change: transform, opacity;
+}
+.hero-constellation svg {
+  width: 100%; height: 100%;
+  opacity: 1;
+}
+
+/* Layer 2: Paper cascade */
+.hero-papers {
+  position: absolute; inset: -15%;
+  pointer-events: none; z-index: 2;
+  perspective: 1400px;
+  perspective-origin: 50% 50%;
+  will-change: transform;
+}
+.paper-card {
+  position: absolute;
+  background: var(--surface);
+  border: 1px solid rgba(223,255,26,0.10);
+  border-radius: 0;
+  box-shadow:
+    0 1px 0 rgba(0,0,0,0.35),
+    0 8px 24px rgba(0,0,0,0.35);
+  overflow: hidden;
+  will-change: transform;
+  transform:
+    translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0))
+    rotateZ(var(--rz, 0deg));
+  transition: transform 0.08s linear;
+}
+/* Accent bar at top */
+.paper-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0.35;
+}
+/* Left cascade */
+.paper-card:nth-child(1) {
+  width: 18vw; max-width: 150px; height: 25vw; max-height: 200px;
+  top: 10%; left: 2%;
+  --tz: -80px; --rz: -8deg;
+  --entrance-opacity: 1;
+}
+.paper-card:nth-child(2) {
+  width: 15vw; max-width: 125px; height: 20vw; max-height: 170px;
+  top: 40%; left: 8%;
+  --tz: -40px; --rz: 5deg;
+  --entrance-opacity: 1;
+}
+.paper-card:nth-child(3) {
+  width: 16vw; max-width: 135px; height: 22vw; max-height: 185px;
+  top: 68%; left: 4%;
+  --tz: -100px; --rz: -12deg;
+  --entrance-opacity: 1;
+}
+/* Right cascade */
+.paper-card:nth-child(4) {
+  width: 20vw; max-width: 170px; height: 27vw; max-height: 225px;
+  top: 14%; right: 0%;
+  --tz: -60px; --rz: 10deg;
+  --entrance-opacity: 1;
+}
+.paper-card:nth-child(5) {
+  width: 16vw; max-width: 135px; height: 21vw; max-height: 175px;
+  top: 42%; right: 6%;
+  --tz: -20px; --rz: -6deg;
+  --entrance-opacity: 1;
+}
+.paper-card:nth-child(6) {
+  width: 17vw; max-width: 145px; height: 24vw; max-height: 200px;
+  top: 72%; right: 2%;
+  --tz: -120px; --rz: 14deg;
+  --entrance-opacity: 1;
+}
+/* Center depth pieces */
+.paper-card:nth-child(7) {
+  width: 13vw; max-width: 110px; height: 18vw; max-height: 150px;
+  top: 32%; right: 33%;
+  --tz: 10px; --rz: -4deg;
+  --entrance-opacity: 1;
+}
+.paper-card:nth-child(8) {
+  width: 12vw; max-width: 105px; height: 17vw; max-height: 145px;
+  top: 77%; left: 29%;
+  --tz: 5px; --rz: 7deg;
+  --entrance-opacity: 1;
+}
+.paper-card:nth-child(9) {
+  width: 11vw; max-width: 95px; height: 15vw; max-height: 130px;
+  top: 22%; left: 30%;
+  --tz: -30px; --rz: -3deg;
+  --entrance-opacity: 1;
+}
+
+/* Layer 3: Watermark */
 .hero-watermark {
   position: absolute;
-  font-size: 22vw;
-  font-weight: 800;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32vw; font-weight: 800;
   color: var(--fg);
-  opacity: 0.03;
-  letter-spacing: -0.03em;
-  line-height: 0.85;
-  user-select: none;
-  pointer-events: none;
-  z-index: 1;
-  white-space: nowrap;
+  letter-spacing: -0.04em; line-height: 0.85;
+  user-select: none; pointer-events: none;
+  z-index: 3; white-space: nowrap;
+  will-change: transform, opacity;
+  opacity: 0;
 }
+
+/* Layer 4: Content */
 .hero-content {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  padding: 32px;
+  position: relative; z-index: 10;
+  text-align: left;
+  padding: 0 48px 80px;
+  max-width: 800px;
+  will-change: transform, opacity;
 }
-.hero-rule {
-  width: 40px;
-  height: 3px;
-  background: var(--accent);
-  margin-bottom: 16px;
-}
-.hero-tagline {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--fg-tertiary);
-  margin-bottom: 8px;
-}
-.hero-title {
-  font-size: clamp(48px, 14vw, 72px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 0.9;
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-.hero-sub {
-  font-size: 18px;
-  line-height: 1.55;
-  color: var(--fg-secondary);
-  max-width: 320px;
-}
-.hero-scroll {
+.hero-mark {
   position: absolute;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 40px; left: 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   z-index: 20;
-  opacity: 0.45;
+}
+.hero-mark-line {
+  width: 1px;
+  height: 48px;
+  background: var(--accent);
+}
+.hero-mark-text {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  margin-top: 8px;
+}
+.hero-year {
+  position: absolute;
+  top: 40px; right: 48px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--fg-tertiary);
+  z-index: 20;
+}
+.hero-issue {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+  margin-bottom: 32px;
+}
+.hero-title {
+  font-family: var(--font-sans);
+  font-size: clamp(56px, 10vw, 144px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.88;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+  word-break: break-word;
+}
+.hero-tagline {
+  font-family: var(--font-sans);
+  font-size: 22px;
+  font-style: italic;
+  color: var(--fg-secondary);
+  margin-bottom: 16px;
+  max-width: 440px;
+}
+.hero-meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--fg-tertiary);
+  max-width: 320px;
+}
+
+/* Handle */
+.hero-handle {
+  position: absolute;
+  bottom: 48px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+}
+.hero-handle-bar {
+  width: 40px; height: 4px;
+  background: rgba(240,235,224,0.12);
+  border-radius: 2px;
+}
+
+/* Scroll cue */
+.hero-scroll {
+  position: absolute;
+  bottom: 80px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column;
+  align-items: center; gap: 10px;
+  z-index: 20; opacity: 0;
+  will-change: transform, opacity;
 }
 .hero-scroll-text {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--fg-tertiary);
+  font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--fg-tertiary);
 }
 .hero-scroll-line {
-  width: 1px;
-  height: 32px;
-  background: var(--border-solid);
+  width: 1px; height: 36px;
+  background: var(--border);
   animation: pulse-line 2.5s linear infinite;
 }
 @keyframes pulse-line {
   0%,100% { transform: scaleY(0.6); opacity: 0.3; }
-  50% { transform: scaleY(1); opacity: 0.8; }
+  50% { transform: scaleY(1); opacity: 0.7; }
 }
 
-/* ── Hero entrance ── */
-.hero-rule,
-.hero-tagline,
-.hero-title,
-.hero-sub {
-  opacity: 0;
-  transition: opacity 0.5s ease-out;
-}
-.hero-scroll {
-  opacity: 0;
-  transition: opacity 0.5s ease-out;
-}
-.hero-watermark {
-  opacity: 0;
-}
-.hero-loaded .hero-watermark {
-  opacity: 0.03;
-}
-.hero-loaded .hero-rule {
+/* ═══════════ ENTRANCE ANIMATIONS ═══════════ */
+.hero-watermark { transition: opacity 1.2s ease-out; }
+.hero-loaded #heroWm { opacity: 0.03; }
+
+.hero-loaded .hero-issue {
   opacity: 1;
-  transition-delay: 0.08s;
-}
-.hero-loaded .hero-tagline {
-  opacity: 1;
-  transition-delay: 0.16s;
+  transition: opacity 0.8s ease-out 0.15s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+  transform: translateY(0);
 }
 .hero-loaded .hero-title {
   opacity: 1;
-  transition-delay: 0.24s;
+  transition: opacity 0.9s ease-out 0.3s, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+  transform: translateY(0);
 }
-.hero-loaded .hero-sub {
+.hero-loaded .hero-tagline {
   opacity: 1;
-  transition-delay: 0.32s;
+  transition: opacity 0.9s ease-out 0.5s, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.5s;
+  transform: translateY(0);
+}
+.hero-loaded .hero-handle {
+  opacity: 1;
+  transition: opacity 0.6s ease-out 0.7s;
 }
 .hero-loaded .hero-scroll {
-  opacity: 0.45;
-  transition-delay: 0.48s;
+  opacity: 0.5;
+  transition: opacity 0.8s ease-out 0.8s;
 }
+
+/* Paper card entrance — staggered rise + fade */
+.hero-issue, .hero-title, .hero-tagline {
+  opacity: 0;
+  transform: translateY(28px);
+}
+
+.paper-card {
+  opacity: 0;
+  transform:
+    translate3d(var(--tx, 0), calc(var(--ty, 0) + 60px), var(--tz, 0))
+    rotateZ(var(--rz, 0deg));
+  transition: opacity 0.9s ease-out, transform 0.9s cubic-bezier(0.1, 0.7, 0.1, 1);
+}
+.hero-loaded .paper-card {
+  opacity: var(--entrance-opacity, 1);
+  transform:
+    translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0))
+    rotateZ(var(--rz, 0deg));
+}
+.hero-loaded .paper-card:nth-child(1) { transition-delay: 0.2s; }
+.hero-loaded .paper-card:nth-child(2) { transition-delay: 0.3s; }
+.hero-loaded .paper-card:nth-child(3) { transition-delay: 0.4s; }
+.hero-loaded .paper-card:nth-child(4) { transition-delay: 0.25s; }
+.hero-loaded .paper-card:nth-child(5) { transition-delay: 0.35s; }
+.hero-loaded .paper-card:nth-child(6) { transition-delay: 0.45s; }
+.hero-loaded .paper-card:nth-child(7) { transition-delay: 0.5s; }
+.hero-loaded .paper-card:nth-child(8) { transition-delay: 0.55s; }
+.hero-loaded .paper-card:nth-child(9) { transition-delay: 0.6s; }
 
 /* ── Paper sections ── */
 .paper-section {
@@ -237,7 +409,7 @@ a:focus-visible {
   position: relative;
   z-index: 10;
   margin-top: auto;
-  padding: 0 24px 80px;
+  padding: 0 24px 120px;
   width: 100%;
 }
 
@@ -559,23 +731,106 @@ a:focus-visible {
 
 <main class="snap-container" id="feed">
 
-<!-- ═══════ HERO ═══════ -->
-<section class="snap-section hero-section is-active" id="hero">
-  <div class="hero-watermark">ARCHIVE</div>
-  <div class="hero-content">
-    <div class="hero-rule"></div>
-    <div class="hero-tagline">Paper feed &middot; v0.1</div>
-    <h1 class="hero-title">Neosis<br>Archive</h1>
-    <p class="hero-sub">Fortune favours the well-informed. A feed for researchers who ship.</p>
-  </div>
-  <div class="hero-scroll">
-    <span class="hero-scroll-text">Scroll</span>
-    <div class="hero-scroll-line"></div>
-  </div>
-</section>
+  <!-- HERO -->
+  <section class="section hero snap-section" id="hero">
+
+    <!-- Layer 1: Constellation -->
+    <div class="hero-constellation" id="heroConstellation" style="display:none;"></div>
+
+    <!-- Layer 2: Paper cascade -->
+    <div class="hero-papers" id="heroPapers">
+      <div class="paper-card">
+        <div class="paper-lines">
+          <div class="pline accent"></div>
+          <div class="pline"></div><div class="pline"></div><div class="pline short"></div>
+          <div class="pline"></div><div class="pline"></div><div class="pline short"></div>
+        </div>
+      </div>
+      <div class="paper-card">
+        <div class="paper-lines">
+          <div class="pline accent"></div>
+          <div class="pline"></div><div class="pline short"></div><div class="pline"></div>
+          <div class="pline"></div><div class="pline short"></div>
+        </div>
+      </div>
+      <div class="paper-card">
+        <div class="paper-lines">
+          <div class="pline accent"></div>
+          <div class="pline"></div><div class="pline"></div><div class="pline"></div>
+          <div class="pline short"></div><div class="pline"></div>
+        </div>
+      </div>
+      <div class="paper-card">
+        <div class="paper-lines">
+          <div class="pline accent"></div>
+          <div class="pline"></div><div class="pline short"></div><div class="pline"></div>
+          <div class="pline"></div><div class="pline"></div><div class="pline short"></div>
+        </div>
+      </div>
+      <div class="paper-card">
+        <div class="paper-lines">
+          <div class="pline accent"></div>
+          <div class="pline"></div><div class="pline"></div><div class="pline short"></div>
+          <div class="pline"></div><div class="pline short"></div>
+        </div>
+      </div>
+      <div class="paper-card">
+        <div class="paper-lines">
+          <div class="pline accent"></div>
+          <div class="pline"></div><div class="pline short"></div><div class="pline"></div>
+          <div class="pline"></div><div class="pline"></div>
+        </div>
+      </div>
+      <div class="paper-card">
+        <div class="paper-lines">
+          <div class="pline accent"></div>
+          <div class="pline short"></div><div class="pline"></div>
+        </div>
+      </div>
+      <div class="paper-card">
+        <div class="paper-lines">
+          <div class="pline accent"></div>
+          <div class="pline"></div><div class="pline short"></div><div class="pline"></div>
+        </div>
+      </div>
+      <div class="paper-card">
+        <div class="paper-lines">
+          <div class="pline accent"></div>
+          <div class="pline short"></div><div class="pline"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 3: Watermark -->
+    <div class="hero-watermark" id="heroWm">ARCHIVE</div>
+
+    <!-- Layer 4: Content -->
+    <div class="hero-mark" aria-hidden="true">
+      <div class="hero-mark-line"></div>
+      <div class="hero-mark-text">key findings</div>
+    </div>
+    <div class="hero-year">2026</div>
+    <div class="hero-content" id="heroContent">
+      <div class="hero-issue" style="color:#888870">Paper feed · Issue 01</div>
+      <h1 class="hero-title" style="margin-bottom:1rem;border-left: 1px solid var(--accent); padding-left: 6px;">Neosis<br>Archive</h1>
+      <p class="hero-tagline" style="font-size: medium; ">Awakening Your Sleeping Beauties.</p>
+    </div>
+
+    <!-- Scroll cue -->
+    <div class="hero-scroll" id="heroCue">
+      <span class="hero-scroll-text">Scroll</span>
+      <div class="hero-scroll-line"></div>
+    </div>
+
+    <!-- Handle -->
+    <div class="hero-handle" id="heroHandle">
+      <div class="hero-handle-bar"></div>
+    </div>
+
+  </section>
 
 <!-- ═══════ PAPER 1 ═══════ -->
-<section class="snap-section paper-section">
+<section id="neosis-pilot" class="snap-section paper-section">
   <div class="f1-sweep"></div>
   <div class="paper-content">
     <div class="broadcast-reveal venue-badge">
@@ -583,10 +838,10 @@ a:focus-visible {
       <span class="citation-count"><strong>127K+</strong> citations</span>
     </div>
     <h2 class="broadcast-reveal paper-title">
-      Attention Is All You Need
+      Self-Attention Replaces Recurrence
     </h2>
     <p class="broadcast-reveal paper-subtitle">
-      Vaswani et al. · Google Brain / Google Research
+      Attention Is All You Need
     </p>
     <div class="broadcast-reveal"><div class="telemetry-line"></div></div>
     <div class="broadcast-reveal abstract-block">
@@ -615,22 +870,22 @@ a:focus-visible {
   <div class="f1-sweep"></div>
   <div class="paper-content">
     <div class="broadcast-reveal venue-badge">
-      <span class="venue-tag">EACL 2026</span>
-      <span class="citation-count"></span>
+      <span class="venue-tag">NeurIPS 2012</span>
+      <span class="citation-count"><strong>127K+</strong> citations</span>
     </div>
     <h2 class="broadcast-reveal paper-title">
-      Cosine Similarity as Logits?
+      15.3% Error, 10.8 Points Clear
     </h2>
     <p class="broadcast-reveal paper-subtitle">
-      A Scalable Knowledge Probe Using Embedding Vectors from Generative Language Models
+      ImageNet Classification with Deep Convolutional Neural Networks
     </p>
     <div class="broadcast-reveal"><div class="telemetry-line"></div></div>
     <div class="broadcast-reveal abstract-block">
-      <p class="paper-abstract">Proposes <span class="accent">DEER probe</span>: a <span class="accent">O(n)</span> knowledge probe using decoder embedding vectors instead of logits. Supports <span class="accent">Hit@k</span> evaluation, multi-token entities, and disambiguation of homographic tail names.</p>
+      <p class="paper-abstract">Trains a <span class="accent">large, deep convolutional neural network</span> to classify 1.2M ImageNet images. Achieves <span class="accent">15.3% top-5 error</span> on ILSVRC 2012, beating the next best entry by <span class="accent">10.8 percentage points</span>. Introduces ReLU, dropout, and GPU training.</p>
       <div class="collapsed-tags">
-        <span class="tag">Knowledge probing</span>
-        <span class="tag">Embeddings</span>
-        <span class="tag">Scalability</span>
+        <span class="tag">CNN</span>
+        <span class="tag">Computer Vision</span>
+        <span class="tag">ImageNet</span>
       </div>
       <button class="readmore" onclick="toggleReadMore(this)" aria-label="Expand">Read more<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
     </div>
@@ -651,22 +906,22 @@ a:focus-visible {
   <div class="f1-sweep"></div>
   <div class="paper-content">
     <div class="broadcast-reveal venue-badge">
-      <span class="venue-tag">arXiv 2512.01316</span>
-      <span class="citation-count"></span>
+      <span class="venue-tag">CVPR 2016</span>
+      <span class="citation-count"><strong>209K+</strong> citations</span>
     </div>
     <h2 class="broadcast-reveal paper-title">
-      Agreement-Constrained MBR Decoding
+      152 Layers, 3.57% Top-5 Error
     </h2>
     <p class="broadcast-reveal paper-subtitle">
-      Agreement-Constrained Probabilistic Minimum Bayes Risk Decoding
+      Deep Residual Learning for Image Recognition
     </p>
     <div class="broadcast-reveal"><div class="telemetry-line"></div></div>
     <div class="broadcast-reveal abstract-block">
-      <p class="paper-abstract"><span class="accent">AC-PMBR</span> leverages a distilled model to guide score-matrix completion. Reduces <span class="accent">approximation error by 3×</span> over PMBR at comparable cost on WMT'23 <span class="accent">En↔De</span>.</p>
+      <p class="paper-abstract">Introduces <span class="accent">Residual Networks (ResNet)</span> with <span class="accent">152 layers</span>, 8× deeper than VGG. Wins ILSVRC 2015 with <span class="accent">3.57% top-5 error</span>. Residual connections enable training networks <span class="accent">hundreds of layers deep</span>.</p>
       <div class="collapsed-tags">
-        <span class="tag">MBR decoding</span>
-        <span class="tag">Distillation</span>
-        <span class="tag">MT</span>
+        <span class="tag">ResNet</span>
+        <span class="tag">Computer Vision</span>
+        <span class="tag">Deep Learning</span>
       </div>
       <button class="readmore" onclick="toggleReadMore(this)" aria-label="Expand">Read more<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
     </div>
@@ -826,57 +1081,126 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.snap-section').forEach(s => observer.observe(s));
 
 /* Hero entrance */
-window.addEventListener('load', () => {
-  document.getElementById('hero').classList.add('hero-loaded');
-});
 
-/* Hero scroll-linked transforms */
-(function heroScroll() {
-  const hero = document.getElementById('hero');
-  const feed = document.getElementById('feed');
-  if (!hero || !feed) return;
+/* Hero parallax — spring-physics scroll */
+(function() {
+  var viewport = document.getElementById('feed');
+  var hero = document.getElementById('hero');
+  var heroContent = document.getElementById('heroContent');
+  var heroHandle = document.getElementById('heroHandle');
+  var heroCue = document.getElementById('heroCue');
+  var heroConstellation = document.getElementById('heroConstellation');
+  var heroPapers = document.getElementById('heroPapers');
+  var heroWm = document.getElementById('heroWm');
+  var paper1Section = document.getElementById('neosis-pilot');
 
-  const wm = hero.querySelector('.hero-watermark');
-  const content = hero.querySelector('.hero-content');
-  const scrollCue = hero.querySelector('.hero-scroll');
-  const vh = () => window.innerHeight;
+  // Entrance
+  window.addEventListener('load', function() {
+    hero.classList.add('hero-loaded');
+  });
 
-  function update() {
-    const rect = hero.getBoundingClientRect();
-    const p = Math.max(0, Math.min(1, -rect.top / vh())); // 0=visible, 1=scrolled past
+  // Section active state
+  var sectionObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-active');
+      } else {
+        entry.target.classList.remove('is-active');
+      }
+    });
+  }, { threshold: 0.5 });
 
-    if (content) {
-      // Content exits faster -> depth
-      const cy = -p * 45;   // vh
-      const cs = 1 - p * 0.1;
-      const ca = 1 - p * 1.3;
-      content.style.transform = `translateY(${cy}vh) scale(${cs})`;
-      content.style.opacity = Math.max(0, ca);
+  if (paper1Section) sectionObserver.observe(paper1Section);
+
+  // Parallax with spring physics
+  if (!viewport || !heroContent) return;
+
+  var vh = window.innerHeight;
+  var targetP = 0;
+  var currentP = 0;
+  var velocity = 0;
+  var isRunning = false;
+
+  function tick() {
+    var force = (targetP - currentP) * 0.03;
+    velocity += force;
+    velocity *= 0.78;
+    currentP += velocity;
+
+    var p = Math.max(0, Math.min(1, currentP));
+
+    // Content: rises and fades
+    if (heroContent) {
+      var cy = -p * 80;
+      var cs = 1 - p * 0.05;
+      heroContent.style.transform = 'translateY(' + cy + 'px) scale(' + cs + ')';
+      heroContent.style.opacity = Math.max(0, 1 - p * 1.5);
     }
 
-    if (wm) {
-      // Watermark drifts slower (background-ish)
-      const wy = -p * 15;
-      const wa = 0.03 * (1 - p);
-      wm.style.transform = `translateY(${wy}vh)`;
-      wm.style.opacity = Math.max(0, wa);
+    // Handle & scroll cue: fade fast
+    if (heroHandle) {
+      heroHandle.style.opacity = Math.max(0, 1 - p * 8);
+    }
+    if (heroCue) {
+      heroCue.style.opacity = Math.max(0, (1 - p * 1.5) * 0.5);
+      heroCue.style.transform = 'translateX(-50%) translateY(' + (-p * 20) + 'px)';
     }
 
-    if (scrollCue) {
-      // Cue fades out fast
-      const sy = -p * 30;
-      const sa = 0.45 * Math.max(0, 1 - p * 4);
-      scrollCue.style.transform = `translateX(-50%) translateY(${sy}vh)`;
-      scrollCue.style.opacity = Math.max(0, sa);
+    // Constellation: parallax + scale
+    if (heroConstellation) {
+      heroConstellation.style.transform = 'translateY(' + (p * vh * 0.12) + 'px) scale(' + (1 + p * 0.04) + ')';
+      heroConstellation.style.opacity = Math.max(0, 1 - p * 0.5);
+    }
+
+    // Watermark: subtle parallax + opacity
+    if (heroWm) {
+      heroWm.style.transform = 'translate(-50%, -50%) translateY(' + (-p * vh * 0.08) + 'px) scale(' + (1 + p * 0.06) + ')';
+      heroWm.style.opacity = Math.max(0, 0.03 - p * 0.05);
+    }
+
+    // Paper cards: explosive scroll parallax
+    if (heroPapers) {
+      var cards = heroPapers.querySelectorAll('.paper-card');
+      var ySpeeds = [1.5, 2.8, 5.0, 2.0, 3.5, 6.5, 1.2, 2.5, 4.5];
+      var xSpeeds = [1.2, 2.5, -2.0, -1.8, 3.0, -3.5, 0.8, -1.5, 2.2];
+      var rotSpeeds = [120, -180, 240, -120, 200, -320, 80, -160, 220];
+      cards.forEach(function(c, i) {
+        var ySpd = ySpeeds[i] * 3;
+        var xSpd = xSpeeds[i];
+        var rotSpd = rotSpeeds[i];
+        var yOffset = -p * vh * ySpd;
+        var xOffset = p * vh * xSpd;
+        var rotateOffset = p * rotSpd;
+        var scale = 1 - p * 0.3;
+        var opacity = Math.max(0, 1 - p * 1.5);
+        c.style.transform =
+          'translate3d(calc(var(--tx, 0) + ' + xOffset + 'px), calc(var(--ty, 0) + ' + yOffset + 'px), var(--tz, 0)) ' +
+          'rotateZ(calc(var(--rz, 0deg) + ' + rotateOffset + 'deg)) scale(' + scale + ')';
+        c.style.opacity = opacity;
+      });
+    }
+
+    if (Math.abs(velocity) > 0.0005 || Math.abs(targetP - currentP) > 0.001) {
+      requestAnimationFrame(tick);
+    } else {
+      isRunning = false;
+      currentP = targetP;
     }
   }
 
-  feed.addEventListener('scroll', update, { passive: true });
-  window.addEventListener('resize', update);
-  // Run once after entrance delay
-  setTimeout(update, 600);
-})();
+  viewport.addEventListener('scroll', function() {
+    targetP = viewport.scrollTop / vh;
+    if (!isRunning) {
+      isRunning = true;
+      requestAnimationFrame(tick);
+    }
+  }, { passive: true });
 
+  window.addEventListener('resize', function() {
+    vh = window.innerHeight;
+  }, { passive: true });
+
+})();
 function toggleSave(btn) {
   const saved = btn.classList.toggle('saved');
   btn.setAttribute('aria-label', saved ? 'Unsave paper' : 'Save paper');

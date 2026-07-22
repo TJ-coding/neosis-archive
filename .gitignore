@@ -10,3 +10,5 @@ undercut_papers/undercut_papers_server
 undercut_papers/pubspec.lock
 undercut_papers/pubspec.yaml
 undercut_papers/tokens.json
+
+undercut_papers/*
