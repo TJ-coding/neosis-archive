@@ -629,88 +629,6 @@ a:focus-visible {
   margin-bottom: 0;
 }
 
-/* ═══════ Swipe action hints ═══════ */
-.swipe-hint {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: var(--fg-tertiary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-  transition: opacity 0.15s linear, color 0.15s linear;
-}
-.swipe-hint span {
-  display: inline-flex;
-  width: 18px;
-  height: 18px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border-solid);
-  flex-shrink: 0;
-}
-.dismiss-hint {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--fg-tertiary);
-  text-align: center;
-  padding: 6px 0;
-  border-top: 1px solid var(--border-solid);
-  margin-top: 12px;
-}
-
-/* ═══════ Swipe overlays (Tinder-style) ═══════ */
-.swipe-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 30;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 32px;
-}
-.swipe-badge {
-  font-family: var(--font-sans);
-  font-size: clamp(28px, 5vw, 48px);
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 8px 24px;
-  border-width: 4px;
-  border-style: solid;
-  transform: rotate(-12deg);
-  opacity: 0;
-  transition: opacity 0.1s linear;
-  width: fit-content;
-}
-.swipe-badge--read {
-  color: var(--accent);
-  border-color: var(--accent);
-  align-self: flex-end;
-  transform: rotate(12deg);
-}
-.swipe-badge--dislike {
-  color: #ff4444;
-  border-color: #ff4444;
-  align-self: flex-start;
-  transform: rotate(-12deg);
-}
-
-/* ═══════ Swipe physics on paper cards ═══════ */
-.paper-section {
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-              opacity 0.3s ease;
-  touch-action: pan-y;
-}
-.paper-section.is-dragging {
-  transition: none;
-}
-
-
 /* ── Tags ── */
 .paper-tags {
   display: flex;
@@ -804,6 +722,63 @@ a:focus-visible {
   text-transform: uppercase;
   color: var(--fg-tertiary);
 }
+
+
+/* ═══════ Swipe overlays (Tinder-style) ═══════ */
+.paper-section {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+  touch-action: pan-y;
+  overflow: hidden;
+}
+.paper-section.is-dragging {
+  transition: none;
+}
+.swipe-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 32px;
+}
+.swipe-badge {
+  font-family: var(--font-sans);
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 8px 24px;
+  border-width: 4px;
+  border-style: solid;
+  opacity: 0;
+  transition: opacity 0.1s linear;
+  width: fit-content;
+}
+.swipe-badge--read {
+  color: var(--accent);
+  border-color: var(--accent);
+  align-self: flex-end;
+  transform: rotate(12deg);
+}
+.swipe-badge--dislike {
+  color: #ff4444;
+  border-color: #ff4444;
+  align-self: flex-start;
+  transform: rotate(-12deg);
+}
+/* Tutorial card: tilt-on-load hint */
+@keyframes card-intro-tilt {
+  0%   { transform: rotate(0deg); }
+  40%  { transform: rotate(2.5deg); }
+  70%  { transform: rotate(-2deg); }
+  100% { transform: rotate(0deg); }
+}
+.paper-section.is-tutorial {
+  animation: card-intro-tilt 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+}
+
 </style>
 </head>
 <body>
@@ -911,6 +886,38 @@ a:focus-visible {
 
   </section>
 
+
+<!-- ═══════ TUTORIAL ═══════ -->
+<section class="snap-section paper-section is-tutorial" id="tutorial-card">
+  <div class="f1-sweep"></div>
+  <div class="paper-content">
+    <div class="broadcast-reveal venue-badge">
+      <span class="venue-tag">How to use</span>
+    </div>
+    <h2 class="broadcast-reveal paper-title">
+      Swipe to Curate
+    </h2>
+    <p class="broadcast-reveal paper-subtitle">
+      Discover papers that matter
+    </p>
+    <div class="broadcast-reveal"><div class="telemetry-line"></div></div>
+    <div class="broadcast-reveal abstract-block">
+      <p class="paper-abstract" style="max-height: none;">Like a research Tinder: each card is a paper. Drag or swipe to interact.</p>
+      <div style="display: flex; gap: 24px; margin-top: 16px; font-family: var(--font-mono); font-size: 12px; color: var(--fg-secondary);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border: 1px solid #ff4444; color: #ff4444; font-weight: 700;">✕</span>
+          Left — skip
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--accent); color: var(--bg); font-weight: 700;">→</span>
+          Right — read
+        </div>
+      </div>
+      <button class="readmore" onclick="document.getElementById('neosis-pilot').scrollIntoView({behavior:'smooth'})" aria-label="Start">Start reading<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+    </div>
+  </div>
+</section>
+
 <!-- ═══════ PAPER 1 ═══════ -->
 <section id="neosis-pilot" class="snap-section paper-section">
   <div class="f1-sweep"></div>
@@ -926,9 +933,6 @@ a:focus-visible {
       Attention Is All You Need
     </p>
     <div class="broadcast-reveal"><div class="telemetry-line"></div></div>
-    <div class="broadcast-reveal dislike-hint swipe-hint" data-hint="dislike">
-      <span>✕</span> Swipe left to skip
-    </div>
     <div class="broadcast-reveal abstract-block">
       <p class="paper-abstract">Proposes the <span class="accent">Transformer</span>, a network architecture based <span class="accent">solely on attention</span> — no recurrence, no convolutions. Achieves <span class="accent">28.4 BLEU</span> on WMT 2014 EN→DE and <span class="accent">41.8 BLEU</span> on EN→FR, training in <span class="accent">3.5 days on 8 GPUs</span>.</p>
       <div class="collapsed-tags">
@@ -938,9 +942,8 @@ a:focus-visible {
       </div>
       <button class="readmore" onclick="toggleReadMore(this)" aria-label="Expand">Read more<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
     </div>
-    <div class="broadcast-reveal action-hint swipe-hint" data-hint="read">
-      <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></span>
-      Swipe right to read
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-primary">Read Summary →</button>
     </div>
     <div class="broadcast-reveal action-bar">
       <button class="btn btn-secondary">PDF</button>
@@ -966,9 +969,6 @@ a:focus-visible {
       ImageNet Classification with Deep Convolutional Neural Networks
     </p>
     <div class="broadcast-reveal"><div class="telemetry-line"></div></div>
-    <div class="broadcast-reveal dislike-hint swipe-hint" data-hint="dislike">
-      <span>✕</span> Swipe left to skip
-    </div>
     <div class="broadcast-reveal abstract-block">
       <p class="paper-abstract">Trains a <span class="accent">large, deep convolutional neural network</span> to classify 1.2M ImageNet images. Achieves <span class="accent">15.3% top-5 error</span> on ILSVRC 2012, beating the next best entry by <span class="accent">10.8 percentage points</span>. Introduces ReLU, dropout, and GPU training.</p>
       <div class="collapsed-tags">
@@ -978,9 +978,8 @@ a:focus-visible {
       </div>
       <button class="readmore" onclick="toggleReadMore(this)" aria-label="Expand">Read more<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
     </div>
-    <div class="broadcast-reveal action-hint swipe-hint" data-hint="read">
-      <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></span>
-      Swipe right to read
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-primary">Read Summary →</button>
     </div>
     <div class="broadcast-reveal action-bar">
       <button class="btn btn-secondary">PDF</button>
@@ -1006,9 +1005,6 @@ a:focus-visible {
       Deep Residual Learning for Image Recognition
     </p>
     <div class="broadcast-reveal"><div class="telemetry-line"></div></div>
-    <div class="broadcast-reveal dislike-hint swipe-hint" data-hint="dislike">
-      <span>✕</span> Swipe left to skip
-    </div>
     <div class="broadcast-reveal abstract-block">
       <p class="paper-abstract">Introduces <span class="accent">Residual Networks (ResNet)</span> with <span class="accent">152 layers</span>, 8× deeper than VGG. Wins ILSVRC 2015 with <span class="accent">3.57% top-5 error</span>. Residual connections enable training networks <span class="accent">hundreds of layers deep</span>.</p>
       <div class="collapsed-tags">
@@ -1018,9 +1014,8 @@ a:focus-visible {
       </div>
       <button class="readmore" onclick="toggleReadMore(this)" aria-label="Expand">Read more<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
     </div>
-    <div class="broadcast-reveal action-hint swipe-hint" data-hint="read">
-      <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></span>
-      Swipe right to read
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-primary">Read Summary →</button>
     </div>
     <div class="broadcast-reveal action-bar">
       <button class="btn btn-secondary">PDF</button>
@@ -1046,9 +1041,6 @@ a:focus-visible {
       Infini-Attention: Attending to Infinitely Long Contexts with Bounded Memory
     </p>
     <div class="broadcast-reveal"><div class="telemetry-line"></div></div>
-    <div class="broadcast-reveal dislike-hint swipe-hint" data-hint="dislike">
-      <span>✕</span> Swipe left to skip
-    </div>
     <div class="broadcast-reveal abstract-block">
       <p class="paper-abstract">Attend to <span class="accent">infinitely long contexts</span> with <span class="accent">bounded memory</span>. <span class="accent">Compressive memory</span> plus masked local attention, drop-in for existing architectures.</p>
       <div class="collapsed-tags">
@@ -1058,9 +1050,8 @@ a:focus-visible {
       </div>
       <button class="readmore" onclick="toggleReadMore(this)" aria-label="Expand">Read more<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
     </div>
-    <div class="broadcast-reveal action-hint swipe-hint" data-hint="read">
-      <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></span>
-      Swipe right to read
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-primary">Read Summary →</button>
     </div>
     <div class="broadcast-reveal action-bar">
       <button class="btn btn-secondary">PDF</button>
@@ -1086,9 +1077,6 @@ a:focus-visible {
       Generative Agents: Interactive Simulacra of Human Behavior
     </p>
     <div class="broadcast-reveal"><div class="telemetry-line"></div></div>
-    <div class="broadcast-reveal dislike-hint swipe-hint" data-hint="dislike">
-      <span>✕</span> Swipe left to skip
-    </div>
     <div class="broadcast-reveal abstract-block">
       <p class="paper-abstract">Computational agents that simulate <span class="accent">believable human behavior</span>. They wake up, cook breakfast, head to work. They <span class="accent">form opinions</span> and initiate conversations.</p>
       <div class="collapsed-tags">
@@ -1098,9 +1086,8 @@ a:focus-visible {
       </div>
       <button class="readmore" onclick="toggleReadMore(this)" aria-label="Expand">Read more<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
     </div>
-    <div class="broadcast-reveal action-hint swipe-hint" data-hint="read">
-      <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></span>
-      Swipe right to read
+    <div class="broadcast-reveal action-bar">
+      <button class="btn btn-primary">Read Summary →</button>
     </div>
     <div class="broadcast-reveal action-bar">
       <button class="btn btn-secondary">PDF</button>
@@ -1333,7 +1320,6 @@ document.querySelectorAll('.bottom-nav a').forEach(link => {
   var moveEvt = isTouch ? 'touchmove' : 'mousemove';
   var upEvt   = isTouch ? 'touchend' : 'mouseup';
 
-  // Skip hero and end sections, only wire paper-sections
   var papers = document.querySelectorAll('.paper-section');
 
   papers.forEach(function(section) {
@@ -1373,7 +1359,6 @@ document.querySelectorAll('.bottom-nav a').forEach(link => {
       var dx = currentX - startX;
       var dy = currentY - startY;
 
-      // If vertical scroll dominates, abort swipe
       if (Math.abs(dy) > Math.abs(dx) * 1.2 && Math.abs(dy) > 10) {
         isDragging = false;
         section.classList.remove('is-dragging');
@@ -1383,11 +1368,9 @@ document.querySelectorAll('.bottom-nav a').forEach(link => {
         return;
       }
 
-      // Apply transform
       var rot = dx * 0.04;
       section.style.transform = 'translateX(' + dx + 'px) rotate(' + rot + 'deg)';
 
-      // Show badges based on dx
       if (dx > 30) {
         readBadge.style.opacity = Math.min(1, (dx - 30) / 80);
         dislikeBadge.style.opacity = '0';
@@ -1408,22 +1391,18 @@ document.querySelectorAll('.bottom-nav a').forEach(link => {
       var threshold = window.innerWidth * 0.22;
 
       if (dx > threshold) {
-        // Commit RIGHT → READ
         settled = true;
         section.style.transition = 'transform 0.35s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease';
         section.style.transform = 'translateX(' + (window.innerWidth + 100) + 'px) rotate(20deg)';
         section.style.opacity = '0';
-        // After animation, scroll to next
         setTimeout(function() {
           var next = section.nextElementSibling;
           if (next && next.classList.contains('snap-section')) {
             next.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
-          // Reset for demo (remove from DOM after delay)
           setTimeout(function() { section.remove(); }, 600);
         }, 300);
       } else if (dx < -threshold) {
-        // Commit LEFT → DISLIKE
         settled = true;
         section.style.transition = 'transform 0.35s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease';
         section.style.transform = 'translateX(' + (-window.innerWidth - 100) + 'px) rotate(-20deg)';
@@ -1436,7 +1415,6 @@ document.querySelectorAll('.bottom-nav a').forEach(link => {
           setTimeout(function() { section.remove(); }, 600);
         }, 300);
       } else {
-        // Snap back
         section.style.transition = 'transform 0.35s cubic-bezier(0.22,1,0.36,1)';
         section.style.transform = '';
         readBadge.style.opacity = '0';
@@ -1450,6 +1428,7 @@ document.querySelectorAll('.bottom-nav a').forEach(link => {
     }
   });
 })();
+
 </script>
 
 </body>
