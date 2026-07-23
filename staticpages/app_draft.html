@@ -1145,8 +1145,10 @@ const observer = new IntersectionObserver((entries) => {
 
   entries.forEach(entry => {
     if (entry.isIntersecting) {
+      // Debounce: prevent rapid re-trigger (swipe smooth-scroll can fire twice)
+      if (entry.target.dataset.sweepLocked === '1') return;
+
       entry.target.querySelectorAll('.f1-sweep').forEach(sweep => {
-        // Force animation reset so it replays every time we scroll down into the section
         sweep.style.animation = 'none';
         void sweep.offsetHeight; // trigger reflow
         if (!scrollingDown) {
@@ -1156,6 +1158,12 @@ const observer = new IntersectionObserver((entries) => {
         }
       });
       entry.target.classList.add('is-active');
+
+      // Lock for 800ms — longer than the 0.5s sweep animation
+      entry.target.dataset.sweepLocked = '1';
+      setTimeout(() => {
+        if (entry.target) entry.target.dataset.sweepLocked = '';
+      }, 800);
     } else {
       entry.target.classList.remove('is-active');
       entry.target.querySelectorAll('.f1-sweep').forEach(sweep => {
